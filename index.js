@@ -55,6 +55,7 @@ function addSongs(message, songs) {
 
             console.log(res.status);
             addingSong = false;
+            message.react('🐧');
 
         }).catch(error => {
 
@@ -298,11 +299,11 @@ client.on("messageCreate", async (message) => {
                             axios.get((process.env.API_URL + "playlists/" + message.guildId)).then(res => {
 
                                 let uri = res.data._id;
-                                //message.reply('https://open.spotify.com/playlist/' + uri);
+                                message.reply('https://open.spotify.com/playlist/' + uri);
 
                             }).catch(error => {
 
-                                //message.reply("No Playlist found. Run **!updatePlaylist** to start one. ")
+                                message.reply("No Playlist found. Run **!updatePlaylist** to start one. ")
 
                             });
 

@@ -3,17 +3,13 @@ import {
   UrlParametersNotFoundError,
   InvalidAuthCodeError,
   AccessTokenFailure,
-} from '../../../errors';
-import { ApiError } from '../../../errors/CustomError';
-import {
-  validateUrl,
-  parseUrl,
-  getAuthCode,
-} from '../../../spotifyAuthCallback';
+} from '../../../../errors';
+import { ApiError } from '../../../../errors/CustomError';
+import { validateUrl, parseUrl, getAuthCode } from '../../spotifyAuthCallback';
 import * as TE from 'fp-ts/TaskEither';
 import { IncomingMessage } from 'http';
 
-const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.PORT}${process.env.REDIRECT_PATH}`;
+const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.REDIRECT_PORT}${process.env.REDIRECT_PATH}`;
 
 describe('parseUrl', () => {
   it('should return a TaskEither with the request object if the URL is valid', () => {

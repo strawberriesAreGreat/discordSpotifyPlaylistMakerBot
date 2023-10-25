@@ -7,12 +7,12 @@ import {
   InvalidAuthCodeError,
   AccessTokenFailure,
   RefreshTokenFailure,
-} from './errors';
-import { ApiError } from './errors/CustomError';
+} from '../../errors';
+import { ApiError } from '../../errors/CustomError';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { Buffer } from 'buffer';
-const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.PORT}${process.env.REDIRECT_PATH}`;
+const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.REDIRECT_PORT}${process.env.REDIRECT_PATH}`;
 
 dotenv.config();
 
@@ -112,9 +112,13 @@ export function requestAccessToken(
 export function saveTokenDataToDb(tokens: Tokens): TE.TaskEither<Error, void> {
   process.env.USER_ACCESS_TOKEN = tokens.access_token;
   process.env.USER_REFRESH_TOKEN = tokens.refresh_token;
+  console.log('tokens', JSON.stringify(tokens));
   return TE.right(void 0);
 }
 
-const handleError = (e: Error): TE.TaskEither<Error, void> => TE.left(e);
+const handleError = (e: Error): TE.TaskEither<Error, void> => {
+  console.log(e);
+  return TE.left(e);
+};
 
 export default server;

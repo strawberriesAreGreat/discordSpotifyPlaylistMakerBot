@@ -2,7 +2,7 @@ import { Message, TextChannel, Guild } from 'discord.js';
 import axios, { AxiosResponse } from 'axios';
 import { getURIS, addSongs } from './services';
 import DiscordClient from '../discordClient';
-import { updatePlaylist, getPlaylist, createPlaylist } from './listeners';
+import { updatePlaylist, getPlaylist, createPlaylist } from './commands';
 
 export function eventListeners(client: DiscordClient) {
   client.on('ready', () => {
@@ -57,7 +57,7 @@ export function eventListeners(client: DiscordClient) {
 
     const SPOTIFY_AUTH_BASE_URL = 'https://accounts.spotify.com/authorize';
     const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-    const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.PORT}${process.env.REDIRECT_PATH}`;
+    const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.REDIRECT_PORT}${process.env.REDIRECT_PATH}`;
     const SCOPES = 'playlist-modify-private';
     const STATE = 'some-state-of-my-choice';
 

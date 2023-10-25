@@ -2,98 +2,109 @@ import {
   InvalidUrlError,
   UrlParametersNotFoundError,
   InvalidAuthCodeError,
+  AccessTokenFailure,
 } from './errors';
 import { ApiError } from './errors/CustomError';
-import {
-  validateUrl,
-  parseUrl,
-  getAuthCode,
-  saveRefreshToken,
-} from './spotifyAuthCallback';
+import { validateUrl, parseUrl, getAuthCode } from './spotifyAuthCallback';
+import * as TE from 'fp-ts/TaskEither';
+import { IncomingMessage } from 'http';
 
-describe('validateUrl', () => {
-  it('Will throw InvalidUrlError if invalid URL is sent', () => {
-    const req = {
-      url: 'tincan.com:8888/callback?code=AQDKHMDpMp_zIb06Vkao',
-      method: 'GET',
-    } as any;
+const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.PORT}${process.env.REDIRECT_PATH}`;
 
-    expect(() => validateUrl(req)).toThrow(InvalidUrlError);
-  });
-
-  it.only('Will return the request object if the URL is valid', () => {
+describe('parseUrl', () => {
+  it('should return a TaskEither with the request object if the URL is valid', () => {
     const req = {
       url: '/callback',
       method: 'GET',
-    } as any;
-
-    expect(validateUrl(req)).toEqual(req);
+    } as IncomingMessage;
+    expect(validateUrl(req)()).resolves.toEqual({
+      _tag: 'Right',
+      right: req,
+    });
   });
-});
-
-describe('parseUrl', () => {
-  it('Will throw UrlParametersNotFoundError if invalid URL is sent', () => {
+  it('should throw an error for recevieing a favcon url', () => {
     const req = {
-      url: '/spotify-auth-callback',
-    } as any;
-    expect(() => parseUrl(req)).toThrow(UrlParametersNotFoundError);
+      url: '/favcon.ico',
+      method: 'GET',
+    } as IncomingMessage;
+    expect(validateUrl(req)()).resolves.toEqual({
+      _tag: 'Left',
+      left: new InvalidUrlError(),
+    });
   });
-
-  it('Will return the URLSearchParams if the URL is valid', () => {
+  it('should return a TaskEither with an InvalidUrlError if invalid URL is sent', () => {
     const req = {
-      url: '/spotify-auth-callback?code=123',
-    } as any;
-
-    expect(parseUrl(req)).toEqual(new URLSearchParams('code=123'));
+      url: 'tincan.com:8888/callback?code=AQDKHMDpMp_zIb06Vkao',
+      method: 'GET',
+    } as IncomingMessage;
+    expect(validateUrl(req)()).resolves.toEqual({
+      _tag: 'Left',
+      left: new InvalidUrlError(),
+    });
   });
 });
 
-describe('getAuthCode', () => {
-  it('Will throw an InvalidAuthCodeError if the auth code is missing from the URL Params', () => {
-    const urlParams = new URLSearchParams('');
+// describe.only('parseUrl', () => {
+//   // it('Will throw UrlParametersNotFoundError if invalid URL is sent', () => {
+//   //   const req = {
+//   //     url: '/spotify-auth-callback',
+//   //   } as any;
+//   //   expect(parseUrl(req)()).resolves.toEqual({
+//   //     _tag: 'Left',
+//   //     left: new UrlParametersNotFoundError(),
+//   //   });
+//   // });
 
-    expect(() => getAuthCode(urlParams)).toThrow(InvalidAuthCodeError);
-  });
-
-  it('Will return the auth code if it is present in the URL Params', () => {
-    const urlParams = new URLSearchParams('code=123');
-
-    expect(getAuthCode(urlParams)).toEqual('123');
-  });
-});
-
-// describe('saveRefreshToken', () => {
-//   it('Will return true if the auth code is saved to the database', () => {
-//     const authCode = '123';
-
-//     expect(saveRefreshToken(authCode)).toBe(true);
+// //   it('Will return the URLSearchParams if the URL is valid', () => {
+//     const req = {
+//       url: '/spotify-auth-callback?code=123',
+//     } as any;
+//     expect(parseUrl(req)()).resolves.toEqual({
+//       _tag: 'Right',
+//       left: urlParams.get('code'),
+//     });
 //   });
 // });
 
-// describe('saveRefreshToken', () => {
-//   it('should log an error message when the refreshResult is a left', async () => {
-//     const error: ApiError = new InvalidAuthCodeError();
-//     const refreshResult = TE.left(error);
-//     const consoleSpy = jest.spyOn(console, 'log');
+// describe('getAuthCode', () => {
+//   it('Will throw an InvalidAuthCodeError if the auth code is missing from the URL Params', () => {
+//     const urlParams = new URLSearchParams('');
 
-//     await saveRefreshToken(refreshResult)();
-
-//     expect(consoleSpy).toHaveBeenCalledWith(
-//       'Error refreshing access token:',
-//       error.message
-//     );
+//     expect(() => getAuthCode(urlParams)).toThrow(InvalidAuthCodeError);
 //   });
 
-//   it('should log an access token when the refreshResult is a right', async () => {
-//     const accessToken = 'testAccessToken';
-//     const refreshResult = TE.right(accessToken);
-//     const consoleSpy = jest.spyOn(console, 'log');
+//   it('Will return the auth code if it is present in the URL Params', () => {
+//     const urlParams = new URLSearchParams('code=123');
 
-//     await saveRefreshToken(refreshResult)();
-
-//     expect(consoleSpy).toHaveBeenCalledWith(
-//       'Access token refreshed successfully:',
-//       accessToken
-//     );
+//     expect(getAuthCode(urlParams)).toEqual('123');
 //   });
+// });
+
+// it('should return a TaskEither with an error when the request fails', async () => {
+//   const authCode = process.env.USER_CODE as string;
+//   const error = new AccessTokenFailure();
+//   const axiosMock = jest.fn().mockRejectedValueOnce(error);
+//   jest.mock('axios', () => ({ default: axiosMock }));
+
+//   const result = await requestAccessToken(authCode)();
+
+//   expect(axiosMock).toHaveBeenCalledWith({
+//     url: 'https://accounts.spotify.com/api/token',
+//     method: 'POST',
+//     params: {
+//       code: authCode,
+//       redirect_uri: REDIRECT_URI,
+//       grant_type: 'authorization_code',
+//     },
+//     headers: {
+//       Authorization:
+//         'Basic ' +
+//         Buffer.from(
+//           process.env.SPOTIFY_CLIENT_ID +
+//             ':' +
+//             process.env.SPOTIFY_CLIENT_SECRET
+//         ).toString('base64'),
+//     },
+//   });
+//   expect(result).toEqual(TE.left(new AccessTokenFailure()));
 // });

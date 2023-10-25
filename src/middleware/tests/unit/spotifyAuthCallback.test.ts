@@ -3,9 +3,13 @@ import {
   UrlParametersNotFoundError,
   InvalidAuthCodeError,
   AccessTokenFailure,
-} from './errors';
-import { ApiError } from './errors/CustomError';
-import { validateUrl, parseUrl, getAuthCode } from './spotifyAuthCallback';
+} from '../../../errors';
+import { ApiError } from '../../../errors/CustomError';
+import {
+  validateUrl,
+  parseUrl,
+  getAuthCode,
+} from '../../../spotifyAuthCallback';
 import * as TE from 'fp-ts/TaskEither';
 import { IncomingMessage } from 'http';
 

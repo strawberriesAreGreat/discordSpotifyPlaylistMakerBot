@@ -3,6 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import { getURIS, addSongs } from './services';
 import DiscordClient from '../discordClient';
 import { updatePlaylist, getPlaylist, createPlaylist } from './commands';
+import { encryptState } from '../../../services';
 
 export function eventListeners(client: DiscordClient) {
   client.on('ready', () => {
@@ -59,11 +60,11 @@ export function eventListeners(client: DiscordClient) {
     const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
     const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.REDIRECT_PORT}${process.env.REDIRECT_PATH}`;
     const SCOPES = 'playlist-modify-private';
-    const STATE = 'some-state-of-my-choice';
 
     // This is the function to send the authorization link to the user
-    function sendAuthorizationLink(message: Message) {
-      const authLink = `${SPOTIFY_AUTH_BASE_URL}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}&state=${STATE}`;
+    function sendAuthorizationLink(message: Message, authorID: string) {
+      let state = encryptState(authorID);
+      const authLink = `${SPOTIFY_AUTH_BASE_URL}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}&state=${state}`;
       message.author.send(
         `Please authorize the app by clicking on the following link: ${authLink}`
       );
@@ -71,7 +72,7 @@ export function eventListeners(client: DiscordClient) {
 
     // Assuming you have a Discord client set up
     if (message.content === '!requestAuthorization') {
-      sendAuthorizationLink(message);
+      sendAuthorizationLink(message, message.author.id as string);
     }
 
     if (message.content.startsWith('!createPlaylist')) {
@@ -108,7 +109,7 @@ export function eventListeners(client: DiscordClient) {
     }
     if (message.content === '!Authorize') {
       // This is the function to send the authorization link to the user
-      sendAuthorizationLink(message);
+      sendAuthorizationLink(message, message.author.id as string);
     }
   });
 }

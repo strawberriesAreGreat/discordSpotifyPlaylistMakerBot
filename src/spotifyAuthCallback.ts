@@ -2,7 +2,7 @@ import http, { IncomingMessage, ServerResponse } from 'http';
 import { flow, pipe } from 'fp-ts/function';
 import { Task } from 'fp-ts/Task';
 import * as TE from 'fp-ts/TaskEither';
-import { Either, fold } from 'fp-ts/Either';
+import { Either, as, fold } from 'fp-ts/Either';
 import {
   InvalidUrlError,
   UrlParametersNotFoundError,
@@ -14,91 +14,83 @@ import { ApiError } from './errors/CustomError';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { Buffer } from 'buffer';
+const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.PORT}${process.env.REDIRECT_PATH}`;
 
 dotenv.config();
 
 type AuthCode = string;
+type Tokens = { access_token: string; refresh_token: string };
 
 const server = http.createServer(
   (req: IncomingMessage, res: ServerResponse) => {
-    try {
-      pipe(
-        req,
-        validateUrl,
-        parseUrl,
-        getAuthCode,
-        requestAccessToken,
-        saveRefreshToken
-      );
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.write('<html><body><h2>Auth Done!</h2></body></html>');
-      res.end();
-    } catch (e) {
-      console.log(e);
+    pipe(
+      req,
+      TE.right,
+      TE.chain(validateUrl),
+      TE.chain(parseUrl),
+      TE.chain(getAuthCode),
+      TE.chain(requestAccessToken),
+      TE.chain(saveTokenDataToDb),
+      TE.fold(handleError, () => TE.of(undefined))
+    )();
 
-      // TODO: Return error response
-      // res.writeHead(404, { 'Content-Type': 'text/plain' });
-      // res.end('Not found.');
-    }
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.write('<html><body><h2>Auth Done!</h2></body></html>');
+    res.end();
   }
 );
 
-server.listen(process.env.PORT || 3333, () => {
-  console.log(`Server listening on port ${process.env.PORT || 8888}`);
-});
-
-export function validateUrl(req: IncomingMessage): IncomingMessage {
-  console.log('Validating URL');
+export function validateUrl(
+  req: IncomingMessage
+): TE.TaskEither<Error, IncomingMessage> {
+  const isFavconUrl: boolean = req.url === '/favicon.ico';
   const validUrl: boolean = req.url
     ? req.method === 'GET' && req.url.startsWith(`${process.env.REDIRECT_PATH}`)
     : false;
-  console.log('Validating URL:', validUrl);
-  console.log('req.url:', req.url);
-  console.log('req.path:', process.env.REDIRECT_PATH);
-  if (!validUrl) {
-    throw new InvalidUrlError();
-  }
 
-  return req;
+  return validUrl && !isFavconUrl
+    ? TE.right(req)
+    : TE.left(new InvalidUrlError());
 }
 
-export function parseUrl(req: IncomingMessage): URLSearchParams {
-  console.log('Parsing URL');
+export function parseUrl(
+  req: IncomingMessage
+): TE.TaskEither<Error, URLSearchParams> {
   const urlParams = new URLSearchParams(req.url?.split('?')[1] || '');
-  if (urlParams.size === 0) {
-    throw new UrlParametersNotFoundError();
-  }
 
-  return urlParams;
+  return urlParams.size === 0
+    ? TE.left(new UrlParametersNotFoundError())
+    : TE.right(urlParams);
 }
 
-export const getAuthCode = (urlParams: URLSearchParams): AuthCode => {
-  console.log('Getting auth code');
+export function getAuthCode(
+  urlParams: URLSearchParams
+): TE.TaskEither<Error, AuthCode> {
   const authCode = urlParams.get('code');
 
-  if (authCode === null) {
-    throw new InvalidAuthCodeError();
-  }
-  console.log('AuthCode ' + authCode);
-  return authCode;
-};
+  return authCode === null
+    ? TE.left(new InvalidAuthCodeError())
+    : TE.right(authCode);
+}
 
-export const requestAccessToken = (
+export function requestAccessToken(
   authCode: AuthCode
-): TE.TaskEither<ApiError, string> => {
+): TE.TaskEither<Error, Tokens> {
   const authOptions = {
     url: 'https://accounts.spotify.com/api/token',
     method: 'POST',
     params: {
       code: authCode,
-      redirect_uri: process.env.REDIRECT_URI,
+      redirect_uri: REDIRECT_URI,
       grant_type: 'authorization_code',
     },
     headers: {
       Authorization:
         'Basic ' +
         Buffer.from(
-          process.env.CLIENT_ID + ':' + process.env.CLIENT_SECRET
+          process.env.SPOTIFY_CLIENT_ID +
+            ':' +
+            process.env.SPOTIFY_CLIENT_SECRET
         ).toString('base64'),
     },
   };
@@ -106,65 +98,25 @@ export const requestAccessToken = (
   return pipe(
     TE.tryCatch(
       () => axios(authOptions),
-      (error) => AccessTokenFailure
+      () => new AccessTokenFailure()
     ),
-    TE.mapLeft(() => new AccessTokenFailure()),
-    TE.map((response) => response.data.access_token)
-  );
-};
-
-export const refreshedAccessToken = (
-  refreshToken: string
-): TE.TaskEither<ApiError, string> => {
-  console.log('refreshing acces token');
-  const authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    method: 'POST',
-    params: {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    },
-    headers: {
-      Authorization:
-        'Basic ' +
-        Buffer.from(
-          process.env.CLIENT_ID + ':' + process.env.CLIENT_SECRET
-        ).toString('base64'),
-    },
-  };
-
-  return pipe(
-    TE.tryCatch(
-      () => axios(authOptions),
-      (error) => RefreshTokenFailure
-    ),
-    TE.mapLeft(() => new AccessTokenFailure()),
-    TE.map((response) => response.data.access_token)
-  );
-};
-
-export async function saveRefreshToken(
-  refreshResult: TE.TaskEither<ApiError, string>
-) {
-  console.log('Saving refresh token');
-  const result = await refreshResult();
-
-  console.log(result);
-
-  pipe(
-    refreshResult,
-    TE.fold(
-      (error) => {
-        console.log('Error refreshing access token:', error.message);
-        return TE.left(error);
-      },
-      (accessToken) => {
-        console.log('Access token refreshed successfully:', accessToken);
-        return TE.right(accessToken);
-      }
+    TE.chain((response) =>
+      response.status === 200 && response.data.access_token !== null
+        ? TE.right({
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token,
+          })
+        : TE.left(new AccessTokenFailure())
     )
   );
-  console.log('Saved refresh token');
 }
+
+export function saveTokenDataToDb(tokens: Tokens): TE.TaskEither<Error, void> {
+  process.env.USER_ACCESS_TOKEN = tokens.access_token;
+  process.env.USER_REFRESH_TOKEN = tokens.refresh_token;
+  return TE.right(void 0);
+}
+
+const handleError = (e: Error): TE.TaskEither<Error, void> => TE.left(e);
 
 export default server;

@@ -1,8 +1,6 @@
 import http, { IncomingMessage, ServerResponse } from 'http';
-import { flow, pipe } from 'fp-ts/function';
-import { Task } from 'fp-ts/Task';
+import { pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/TaskEither';
-import { Either, as, fold } from 'fp-ts/Either';
 import {
   InvalidUrlError,
   UrlParametersNotFoundError,

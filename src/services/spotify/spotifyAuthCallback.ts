@@ -63,7 +63,8 @@ export function validateUrl(
 ): TE.TaskEither<Error, IncomingMessage> {
   const isFavconUrl: boolean = req.url === '/favicon.ico';
   const validUrl: boolean = req.url
-    ? req.method === 'GET' && req.url.startsWith(`${process.env.REDIRECT_PATH}`)
+    ? req.method === 'GET' &&
+      req.url.startsWith(`${process.env.SPOTIFY_OAUTH_REDIRECT_PATH}`)
     : false;
   console.log('validUrl', validUrl);
   return validUrl && !isFavconUrl

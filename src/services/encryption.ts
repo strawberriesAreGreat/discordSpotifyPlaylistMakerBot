@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.SECRET as string;
+const ENCRYPTION_KEY = process.env.ENCRYPTION_SECRET as string;
 const algorithm = 'aes-256-ctr';
 const IV_LENGTH = 16;
 let iv = crypto.randomBytes(IV_LENGTH);

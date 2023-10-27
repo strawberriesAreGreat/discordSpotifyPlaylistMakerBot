@@ -34,4 +34,5 @@ DiscordUser.init(
     modelName: 'discord_user',
   }
 );
+DiscordUser.sync();
 // hasOne spotifyToken

@@ -6,13 +6,12 @@ import {
   UrlParametersNotFoundError,
   InvalidAuthCodeError,
   AccessTokenFailure,
-  RefreshTokenFailure,
 } from '../../utils/errors';
 import { ApiError } from '../../utils/errors/CustomError';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { Buffer } from 'buffer';
-const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.REDIRECT_PORT}${process.env.REDIRECT_PATH}`;
+const REDIRECT_URI = `${process.env.APP_SCHEME}://${process.env.APP_HOSTNAME}:${process.env.APP_PORT}${process.env.SPOTIFY_OAUTH_REDIRECT_PATH}`;
 
 dotenv.config();
 
@@ -41,9 +40,13 @@ const server = http.createServer(
 export function validateUrl(
   req: IncomingMessage
 ): TE.TaskEither<Error, IncomingMessage> {
+  console.log('validateUrl');
+  console.log('req.url', req.url);
+  console.log(process.env.SPOTIFY_OAUTH_REDIRECT_PATH);
   const isFavconUrl: boolean = req.url === '/favicon.ico';
   const validUrl: boolean = req.url
-    ? req.method === 'GET' && req.url.startsWith(`${process.env.REDIRECT_PATH}`)
+    ? req.method === 'GET' &&
+      req.url.startsWith(`${process.env.SPOTIFY_OAUTH_REDIRECT_PATH}`)
     : false;
 
   return validUrl && !isFavconUrl
@@ -110,9 +113,20 @@ export function requestAccessToken(
 }
 
 export function saveTokenDataToDb(tokens: Tokens): TE.TaskEither<Error, void> {
-  process.env.USER_ACCESS_TOKEN = tokens.access_token;
-  process.env.USER_REFRESH_TOKEN = tokens.refresh_token;
-  console.log('tokens', JSON.stringify(tokens));
+  DiscordUser.findOne({ where: { discordId: discordId } })
+    .then((user) => {
+      if (user) {
+        SpotifyToken.create({
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token,
+          discordUserId: user.id,
+        });
+      }
+    })
+    .catch((error) => {
+      console.log(`Error saving token data to db: ${error}`);
+    });
+
   return TE.right(void 0);
 }
 

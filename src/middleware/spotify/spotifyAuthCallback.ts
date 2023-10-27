@@ -7,8 +7,8 @@ import {
   InvalidAuthCodeError,
   AccessTokenFailure,
   RefreshTokenFailure,
-} from '../../errors';
-import { ApiError } from '../../errors/CustomError';
+} from '../../utils/errors';
+import { ApiError } from '../../utils/errors/CustomError';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { Buffer } from 'buffer';

@@ -1,7 +1,8 @@
 import DiscordClient from './middleware/discord/discordClient';
 import { eventListeners } from './middleware/discord/helpers/listener';
-import SpotifyAuth from './api/spotify/spotifyAuth';
-import server, { requestAccessToken } from './api/spotify/spotifyAuthCallback';
+import server, {
+  requestAccessToken,
+} from './middleware/spotify/spotifyAuthCallback';
 
 //SpotifyAuth.getAccessToken();
 server.listen(process.env.REDIRECT_PORT, () => {

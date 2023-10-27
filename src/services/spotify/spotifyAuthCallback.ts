@@ -6,32 +6,38 @@ import {
   UrlParametersNotFoundError,
   InvalidAuthCodeError,
   AccessTokenFailure,
-} from '../../errors';
-import { ApiError } from '../../errors/CustomError';
+} from '../../utils/errors';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { Buffer } from 'buffer';
-import { decryptState } from '..';
-import { DiscordUser } from '../../db/models/DiscordUser';
-import { SpotifyToken } from '../../db/models/SpotifyToken';
-const REDIRECT_URI = `${process.env.SCHEME}://${process.env.HOSTNAME}:${process.env.REDIRECT_PORT}${process.env.REDIRECT_PATH}`;
+import { decrypt } from '..';
+import { DiscordUser } from '../../models/DiscordUser';
+import { SpotifyToken } from '../../models/SpotifyToken';
+import { getRedirect_uri } from '../../utils/utils';
+import {
+  DiscordId,
+  DiscordUserData,
+  SpotifyTokenData,
+} from '../../utils/types';
+
+const REDIRECT_URI = getRedirect_uri();
 
 dotenv.config();
 
 type AuthCode = string;
 type State = string;
-type AuthCodeAndState = {
-  authcode: AuthCode;
-  state: State;
-};
-type SpotifyTokenData = {
-  access_token: string;
-  refresh_token: string;
-  state: string;
-  scope: string;
-  expires_in: number;
-  token_type: string;
-};
+// type AuthCodeAndState = {
+//   authcode: AuthCode;
+//   state: State;
+// };
+// type SpotifyTokenData = {
+//   access_token: string;
+//   refresh_token: string;
+//   state: string;
+//   scope: string;
+//   expires_in: number;
+//   token_type: string;
+// };
 
 const server = http.createServer(
   (req: IncomingMessage, res: ServerResponse) => {
@@ -77,12 +83,12 @@ export function parseUrl(
 
 export function getAuthCode(
   urlParams: URLSearchParams
-): TE.TaskEither<Error, AuthCodeAndState> {
+): TE.TaskEither<Error, SpotifyTokenData> {
   const authCode = urlParams.get('code') as string;
   const state = urlParams.get('state') as string;
-  const authCodeAndState: AuthCodeAndState = {
-    authcode: authCode,
-    state: state,
+  const authCodeAndState: SpotifyTokenData = {
+    code: authCode,
+    requestState: state,
   };
 
   return authCode != null && state != null
@@ -91,13 +97,13 @@ export function getAuthCode(
 }
 
 export function requestAccessToken(
-  authCodeAndState: AuthCodeAndState
+  spotifyData: SpotifyTokenData
 ): TE.TaskEither<Error, SpotifyTokenData> {
   const authOptions = {
     url: 'https://accounts.spotify.com/api/token',
     method: 'POST',
     params: {
-      code: authCodeAndState.authcode,
+      code: spotifyData.code,
       redirect_uri: REDIRECT_URI,
       grant_type: 'authorization_code',
     },
@@ -122,7 +128,7 @@ export function requestAccessToken(
         ? TE.right({
             access_token: response.data.access_token,
             refresh_token: response.data.refresh_token,
-            state: authCodeAndState.state,
+            state: spotifyData.requestState,
             scope: response.data.scope,
             expires_in: response.data.expires_in,
             token_type: response.data.token_type,
@@ -132,13 +138,14 @@ export function requestAccessToken(
   );
 }
 
-export function saveTokenDataToDb(tokens: SpotifyTokenData) {
-  const discordUserID = decryptState(tokens.state);
-  const token = tokens.access_token;
-  const refreshToken = tokens.refresh_token;
-  const scope = tokens.scope;
-  const expiresIn = tokens.expires_in;
-  const tokenType = tokens.token_type;
+export function saveTokenDataToDb(
+  spotifyData: SpotifyTokenData
+): TE.TaskEither<Error, void> {
+  const discordUserID: DiscordId = decrypt(spotifyData.requestState as string);
+  const token = spotifyData.access_token;
+  const refreshToken = spotifyData.refresh_token;
+  const scope = spotifyData.scope;
+  const expiresIn = spotifyData.expires_in as number;
   const tokenExpiryTime = new Date(Date.now() + expiresIn * 1000);
 
   DiscordUser.findOne({
@@ -148,34 +155,21 @@ export function saveTokenDataToDb(tokens: SpotifyTokenData) {
   })
     .then((user) => {
       if (!user) {
-        throw new Error(`Discord user with ID ${discordUserID} not found`);
-      }
-
-      return SpotifyToken.create({
-        discord_user_id: discordUserID,
-      });
-    })
-    .then((spotifyToken) => {
-      if (!spotifyToken) {
-        return SpotifyToken.create({
-          access_token: token,
-          refresh_token: refreshToken,
-          scope: scope,
-          expires_in: expiresIn,
-          token_type: tokenType,
-          token_expiry: tokenExpiryTime,
+        SpotifyToken.create({
           discord_user_id: discordUserID,
         });
-      } else {
-        return spotifyToken.update({
-          access_token: token,
-          refresh_token: refreshToken,
-          scope: scope,
-          expires_in: expiresIn,
-          token_type: tokenType,
-          token_expiry: tokenExpiryTime,
-        });
       }
+    })
+    .then(() => {
+      return SpotifyToken.create({
+        access_token: token,
+        refresh_token: refreshToken,
+        scope: scope,
+        expires_in: expiresIn,
+        token_expiry: tokenExpiryTime,
+        discord_user_id: discordUserID,
+        discordId: discordUserID,
+      });
     })
     .then(() => {
       return TE.right(undefined);
@@ -183,19 +177,8 @@ export function saveTokenDataToDb(tokens: SpotifyTokenData) {
     .catch((error: Error) => {
       return TE.left(error);
     });
+  return TE.right(undefined);
 }
-
-// export function saveTokenDataToDb(
-//   tokens: TokensAndState
-// ): TE.TaskEither<Error, void> {
-//   let discordUserID = decryptState(tokens.state);
-//   let token = tokens.access_token;
-//   let refreshToken = tokens.refresh_token;
-
-//   console.log('tokens', JSON.stringify(tokens));
-//   console.log(decryptState(process.env.USER_STATE as string));
-//   return TE.right(void 0);
-// }
 
 const handleError = (e: Error): TE.TaskEither<Error, void> => {
   console.log(e);

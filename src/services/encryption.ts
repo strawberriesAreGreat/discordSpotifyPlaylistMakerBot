@@ -5,7 +5,7 @@ const algorithm = 'aes-256-ctr';
 const IV_LENGTH = 16;
 let iv = crypto.randomBytes(IV_LENGTH);
 
-export function encryptState(state: string): string {
+export function encrypt(state: string): string {
   const cipher = crypto.createCipheriv(
     algorithm,
     Buffer.from(ENCRYPTION_KEY, 'hex'),
@@ -17,7 +17,7 @@ export function encryptState(state: string): string {
   return iv.toString('hex') + ':' + encryptedState.toString('hex');
 }
 
-export function decryptState(encryptedState: string): string {
+export function decrypt(encryptedState: string): string {
   let textParts = encryptedState.split(':');
   let iv = Buffer.from(textParts.shift() as string, 'hex');
   let encryptedText = Buffer.from(textParts.join(':'), 'hex');

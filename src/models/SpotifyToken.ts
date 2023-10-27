@@ -1,13 +1,20 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../db';
+import { sequelize } from './db';
 import { DiscordUser } from './DiscordUser';
+import {
+  AccessToken,
+  RefreshTokenExpiresIn,
+  RefreshToken,
+  Scope,
+  RefreshTokenExpiry,
+} from '../utils/types';
 
 export class SpotifyToken extends Model {
-  public access_token!: string;
-  public token_type!: string;
-  public scope!: string;
-  public expires_in!: number;
-  public refresh_token!: string;
+  public access_token!: AccessToken;
+  public refresh_token!: RefreshToken;
+  public scope!: Scope;
+  public expires_in!: RefreshTokenExpiresIn;
+  public token_expiry!: RefreshTokenExpiry;
 }
 
 SpotifyToken.init(
@@ -31,10 +38,6 @@ SpotifyToken.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    token_type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     scope: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -54,4 +57,4 @@ SpotifyToken.init(
   }
 );
 
-SpotifyToken.belongsTo(DiscordUser, { foreignKey: 'id' });
+SpotifyToken.belongsTo(DiscordUser, { foreignKey: 'discordId' });

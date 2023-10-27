@@ -38,3 +38,10 @@ export class RefreshTokenFailure extends ApiError {
     this.fault = FaultType.USER;
   }
 }
+export class SpotifyApiError extends ApiError {
+  constructor() {
+    super('Spotify API error.');
+    this.name = 'SpotifyApiError';
+    this.fault = FaultType.USER;
+  }
+}

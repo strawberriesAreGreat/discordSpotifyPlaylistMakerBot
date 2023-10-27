@@ -3,7 +3,7 @@ import axios, { AxiosResponse } from 'axios';
 import { getURIS, addSongs } from './services';
 import DiscordClient from '../discordClient';
 import { updatePlaylist, getPlaylist, createPlaylist } from './commands';
-import { encryptState } from '../../../services';
+import { encrypt } from '../../../services';
 
 export function eventListeners(client: DiscordClient) {
   client.on('ready', () => {
@@ -63,7 +63,7 @@ export function eventListeners(client: DiscordClient) {
 
     // This is the function to send the authorization link to the user
     function sendAuthorizationLink(message: Message, authorID: string) {
-      let state = encryptState(authorID);
+      let state = encrypt(authorID);
       const authLink = `${SPOTIFY_AUTH_BASE_URL}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}&state=${state}`;
       message.author.send(
         `Please authorize the app by clicking on the following link: ${authLink}`

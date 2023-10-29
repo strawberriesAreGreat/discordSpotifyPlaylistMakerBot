@@ -15,7 +15,7 @@ server.listen(process.env.APP_PORT, () => {
 
 try {
   console.log('Syncing Sequelize models');
-  await sequelize.sync();
+  sequelize.sync();
 } catch (error) {
   console.log(`Error syncing Sequelize models: ${error}`);
 }

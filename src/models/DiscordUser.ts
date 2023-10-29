@@ -6,7 +6,7 @@ export class DiscordUser extends Model {}
 DiscordUser.init(
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       autoIncrement: true,
       primaryKey: true,
     },

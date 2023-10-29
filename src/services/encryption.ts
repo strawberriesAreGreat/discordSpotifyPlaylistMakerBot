@@ -1,11 +1,11 @@
 import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_SECRET as string;
 const algorithm = 'aes-256-ctr';
 const IV_LENGTH = 16;
 let iv = crypto.randomBytes(IV_LENGTH);
 
-export function encrypt(state: string): string {
+// Takes a string and an encryption key and returns an encrypted string
+export function encrypt(state: string, ENCRYPTION_KEY: string): string {
   const cipher = crypto.createCipheriv(
     algorithm,
     Buffer.from(ENCRYPTION_KEY, 'hex'),
@@ -17,7 +17,11 @@ export function encrypt(state: string): string {
   return iv.toString('hex') + ':' + encryptedState.toString('hex');
 }
 
-export function decrypt(encryptedState: string): string {
+// Takes an encrypted string and an encryption key and returns a decrypted string
+export function decrypt(
+  encryptedState: string,
+  ENCRYPTION_KEY: string
+): string {
   let textParts = encryptedState.split(':');
   let iv = Buffer.from(textParts.shift() as string, 'hex');
   let encryptedText = Buffer.from(textParts.join(':'), 'hex');

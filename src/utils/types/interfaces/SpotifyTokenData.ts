@@ -18,4 +18,5 @@ export interface SpotifyTokenData {
   refresh_token?: RefreshToken;
   expires_in?: RefreshTokenExpiresIn;
   TokenExpiry?: RefreshTokenExpiry;
+  token_type?: string;
 }

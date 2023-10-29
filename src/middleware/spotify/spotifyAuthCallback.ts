@@ -123,7 +123,10 @@ export function requestAccessToken(
 export function saveTokenDataToDb(
   spotifyData: SpotifyTokenData
 ): TE.TaskEither<Error, void> {
-  const discordUserID: DiscordId = decrypt(spotifyData.requestState as string);
+  const discordUserID: DiscordId = decrypt(
+    spotifyData.requestState as string,
+    process.env.ENCRYPTION_SECRET as string
+  );
   const token = spotifyData.access_token;
   const refreshToken = spotifyData.refresh_token;
   const scope = spotifyData.scope;

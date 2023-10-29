@@ -63,7 +63,8 @@ export function eventListeners(client: DiscordClient) {
 
     // This is the function to send the authorization link to the user
     function sendAuthorizationLink(message: Message, authorID: string) {
-      let state = encrypt(authorID);
+      let ENCRYPTION_KEY = process.env.ENCRYPTION_SECRET as string;
+      let state = encrypt(authorID, ENCRYPTION_KEY);
       const authLink = `${SPOTIFY_AUTH_BASE_URL}?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}&state=${state}`;
       message.author.send(
         `Please authorize the app by clicking on the following link: ${authLink}`

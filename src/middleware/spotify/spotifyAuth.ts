@@ -14,10 +14,14 @@ class SpotifyAuth {
       const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
       if (!clientId || !clientSecret) {
-        throw new Error('Missing Spotify client ID or client secret in environment variables');
+        throw new Error(
+          'Missing Spotify client ID or client secret in environment variables'
+        );
       }
 
-      const basic = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+      const basic = Buffer.from(`${clientId}:${clientSecret}`).toString(
+        'base64'
+      );
       const headers = {
         headers: {
           Authorization: `Basic ${basic}`,
@@ -30,7 +34,11 @@ class SpotifyAuth {
       };
 
       try {
-        const response = await axios.post('https://accounts.spotify.com/api/token', qs.stringify(data), headers);
+        const response = await axios.post(
+          'https://accounts.spotify.com/api/token',
+          qs.stringify(data),
+          headers
+        );
         this.accessToken = response.data.access_token;
         this.tokenExpiration = Date.now() + response.data.expires_in * 1000; // Convert to milliseconds
         this.writeToEnv('SPOTIFY_ACCESS_TOKEN', this.accessToken); // Write to .env file

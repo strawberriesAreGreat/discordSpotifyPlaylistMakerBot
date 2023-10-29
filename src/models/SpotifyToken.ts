@@ -58,3 +58,4 @@ SpotifyToken.init(
 );
 
 SpotifyToken.belongsTo(DiscordUser, { foreignKey: 'discordId' });
+SpotifyToken.sync();

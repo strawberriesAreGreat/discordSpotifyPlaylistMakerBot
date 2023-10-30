@@ -13,13 +13,6 @@ server.listen(process.env.APP_PORT, () => {
   console.log(`Server running on port ${process.env.APP_PORT}`);
 });
 
-try {
-  console.log('Syncing Sequelize models');
-  sequelize.sync();
-} catch (error) {
-  console.log(`Error syncing Sequelize models: ${error}`);
-}
-
 const client = new DiscordClient();
 eventListeners(client);
 client.login();

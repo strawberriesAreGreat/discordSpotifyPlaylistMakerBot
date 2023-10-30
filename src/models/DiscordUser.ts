@@ -1,14 +1,21 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from './db';
 
-export class DiscordUser extends Model {}
+export class DiscordUser extends Model {
+  public discordId!: string;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
 
 DiscordUser.init(
   {
-    id: {
-      type: DataTypes.BIGINT,
-      autoIncrement: true,
+    discordId: {
+      type: DataTypes.STRING,
+      allowNull: false,
       primaryKey: true,
+      validate: {
+        is: /^\d+$/,
+      },
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -16,23 +23,11 @@ DiscordUser.init(
     updatedAt: {
       type: DataTypes.DATE,
     },
-    discordId: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        is: /^\d+$/,
-      },
-    },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
   },
   {
     sequelize,
-    modelName: 'discord_user',
+    modelName: 'DiscordUser',
   }
 );
-DiscordUser.sync();
-// hasOne spotifyToken
+
+export default DiscordUser;

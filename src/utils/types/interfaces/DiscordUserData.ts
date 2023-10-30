@@ -4,5 +4,4 @@ import { DiscordUsername, DiscordId } from '../enums';
 
 export interface DiscordUserData {
   id: DiscordId;
-  username: DiscordUsername;
 }

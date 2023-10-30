@@ -1,20 +1,21 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from './db';
-import { DiscordUser } from './DiscordUser';
+import DiscordUser from './DiscordUser';
 import {
   AccessToken,
-  RefreshTokenExpiresIn,
   RefreshToken,
-  Scope,
   RefreshTokenExpiry,
+  Scope,
 } from '../utils/types';
 
 export class SpotifyToken extends Model {
+  public id!: number;
   public access_token!: AccessToken;
-  public refresh_token!: RefreshToken;
   public scope!: Scope;
-  public expires_in!: RefreshTokenExpiresIn;
+  public refresh_token!: RefreshToken;
   public token_expiry!: RefreshTokenExpiry;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
 SpotifyToken.init(
@@ -24,16 +25,6 @@ SpotifyToken.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    createdAt: {
-      type: DataTypes.DATE,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-    },
-    token_expiry: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
     access_token: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -42,20 +33,29 @@ SpotifyToken.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    expires_in: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     refresh_token: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    token_expiry: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+    },
   },
   {
     sequelize,
-    tableName: 'spotify_tokens',
+    tableName: 'SpotifyToken',
   }
 );
 
-SpotifyToken.belongsTo(DiscordUser, { foreignKey: 'discordId' });
-SpotifyToken.sync();
+DiscordUser.hasOne(SpotifyToken, {
+  foreignKey: 'discordId',
+});
+
+export default SpotifyToken;

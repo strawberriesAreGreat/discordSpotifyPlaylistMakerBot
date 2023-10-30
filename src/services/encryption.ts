@@ -5,7 +5,7 @@ const IV_LENGTH = 16;
 let iv = crypto.randomBytes(IV_LENGTH);
 
 // Takes a string and an encryption key and returns an encrypted string
-export function encrypt(state: string, ENCRYPTION_KEY: string): string {
+export function encryptString(state: string, ENCRYPTION_KEY: string): string {
   const cipher = crypto.createCipheriv(
     algorithm,
     Buffer.from(ENCRYPTION_KEY, 'hex'),
@@ -18,7 +18,7 @@ export function encrypt(state: string, ENCRYPTION_KEY: string): string {
 }
 
 // Takes an encrypted string and an encryption key and returns a decrypted string
-export function decrypt(
+export function decryptString(
   encryptedState: string,
   ENCRYPTION_KEY: string
 ): string {

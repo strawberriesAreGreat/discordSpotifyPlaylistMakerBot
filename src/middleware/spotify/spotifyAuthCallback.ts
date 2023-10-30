@@ -10,7 +10,7 @@ import {
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { Buffer } from 'buffer';
-import { decrypt } from '../../services';
+import { decryptString, encryptString } from '../../services';
 import { DiscordUser } from '../../models/DiscordUser';
 import { SpotifyToken } from '../../models/SpotifyToken';
 import { getRedirect_uri } from '../../utils/utils';
@@ -47,7 +47,6 @@ export function validateUrl(
     ? req.method === 'GET' &&
       req.url.startsWith(`${process.env.SPOTIFY_OAUTH_REDIRECT_PATH}`)
     : false;
-  console.log('validUrl', validUrl);
   return validUrl && !isFavconUrl
     ? TE.right(req)
     : TE.left(new InvalidUrlError());
@@ -123,46 +122,53 @@ export function requestAccessToken(
 export function saveTokenDataToDb(
   spotifyData: SpotifyTokenData
 ): TE.TaskEither<Error, void> {
-  const discordUserID: DiscordId = decrypt(
+  const discordUserID: DiscordId = decryptString(
     spotifyData.requestState as string,
     process.env.ENCRYPTION_SECRET as string
   );
   const token = spotifyData.access_token;
   const refreshToken = spotifyData.refresh_token;
   const scope = spotifyData.scope;
-  const expiresIn = spotifyData.expires_in as number;
-  const tokenExpiryTime = new Date(Date.now() + expiresIn * 1000);
+  const tokenExpiry = spotifyData.expires_in as number;
 
-  DiscordUser.findOne({
-    where: {
-      discordId: discordUserID,
-    },
-  })
-    .then((user) => {
-      if (!user) {
-        DiscordUser.create({
-          discord_user_id: discordUserID,
-        });
-      }
-    })
-    .then(() => {
-      return SpotifyToken.create({
-        access_token: token,
-        refresh_token: refreshToken,
-        scope: scope,
-        expires_in: expiresIn,
-        token_expiry: tokenExpiryTime,
-        discord_user_id: discordUserID,
-        discordId: discordUserID,
-      });
-    })
-    .then(() => {
-      return TE.right(undefined);
-    })
-    .catch((error: Error) => {
-      return TE.left(error);
-    });
-  return TE.right(undefined);
+  return pipe(
+    TE.tryCatch(
+      () =>
+        DiscordUser.findOne({
+          where: {
+            discordId: discordUserID,
+          },
+        }),
+      (err) => new Error(`Failed to find DiscordUser: ${err}`)
+    ),
+    TE.chain((user) =>
+      user
+        ? TE.right(user)
+        : TE.tryCatch(
+            () =>
+              DiscordUser.create({
+                discordId: discordUserID,
+              }),
+            (err) => new Error(`Failed to create DiscordUser: ${err}`)
+          )
+    ),
+    TE.chain((user) =>
+      TE.tryCatch(
+        () =>
+          // TODO: encrypt all database read and writes
+          SpotifyToken.create({
+            access_token: token,
+            refresh_token: refreshToken,
+            scope: scope,
+            token_expiry: tokenExpiry,
+            discord_user_id: user.discordId,
+            discordId: discordUserID,
+          }),
+        (err) => new Error(`Failed to create SpotifyToken: ${err}`)
+      )
+    ),
+    TE.map(() => undefined)
+  );
 }
 
 const handleError = (e: Error): TE.TaskEither<Error, void> => {

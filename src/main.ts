@@ -1,12 +1,6 @@
 import DiscordClient from './middleware/discord/discordClient';
 import { eventListeners } from './middleware/discord/helpers/listener';
-import server, {
-  requestAccessToken,
-} from './middleware/spotify/spotifyAuthCallback';
-import { DiscordUser } from './models/DiscordUser';
-import { SpotifyToken } from './models/SpotifyToken';
-import { sequelize } from './models/db';
-import { DiscordId } from './utils/types';
+import server from './middleware/spotify/spotifyAuthCallback';
 
 //SpotifyAuth.getAccessToken();
 server.listen(process.env.APP_PORT, () => {

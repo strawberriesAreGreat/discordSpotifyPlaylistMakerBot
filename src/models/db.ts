@@ -1,4 +1,4 @@
-import { Sequelize, Model, DataTypes } from 'sequelize';
+import { Sequelize } from 'sequelize';
 
 export const sequelize = new Sequelize({
   dialect: 'postgres',
@@ -9,4 +9,12 @@ export const sequelize = new Sequelize({
   database: process.env.DB_NAME,
 });
 
-sequelize.sync();
+console.log('Attempting to connect to database...');
+try {
+  sequelize.authenticate();
+  sequelize.sync();
+  console.log('Connection has been established successfully.');
+} catch (err) {
+  console.log('Unable to connect to the database:');
+  console.log(err);
+}

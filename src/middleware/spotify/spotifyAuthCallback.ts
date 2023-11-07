@@ -10,11 +10,15 @@ import {
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { Buffer } from 'buffer';
-import { decryptString, encryptString } from '../../services';
+import { decryptString, encryptString, hashDiscordId } from '../../services';
 import { DiscordUser } from '../../models/DiscordUser';
 import { SpotifyToken } from '../../models/SpotifyToken';
 import { getRedirect_uri } from '../../utils/utils';
-import { DiscordId, SpotifyTokenData } from '../../utils/types';
+import {
+  DiscordId,
+  EncryptedString,
+  SpotifyTokenData,
+} from '../../utils/types';
 
 const REDIRECT_URI = getRedirect_uri();
 
@@ -66,10 +70,10 @@ export function getAuthCode(
   urlParams: URLSearchParams
 ): TE.TaskEither<Error, SpotifyTokenData> {
   const authCode = urlParams.get('code') as string;
-  const state = urlParams.get('state') as string;
+  const state = urlParams.get('state') as EncryptedString;
   const authCodeAndState: SpotifyTokenData = {
     code: authCode,
-    requestState: state,
+    state: state,
   };
 
   return authCode != null && state != null
@@ -107,9 +111,15 @@ export function requestAccessToken(
     TE.chain((response) =>
       response.status === 200 && response.data.access_token !== null
         ? TE.right({
-            access_token: response.data.access_token,
-            refresh_token: response.data.refresh_token,
-            requestState: spotifyData.requestState,
+            access_token: encryptString(
+              response.data.access_token as string,
+              process.env.ENCRYPTION_SECRET as string
+            ),
+            refresh_token: encryptString(
+              response.data.refresh_token as string,
+              process.env.ENCRYPTION_SECRET as string
+            ),
+            state: spotifyData.state,
             scope: response.data.scope,
             expires_in: response.data.expires_in,
             token_type: response.data.token_type,
@@ -122,14 +132,15 @@ export function requestAccessToken(
 export function saveTokenDataToDb(
   spotifyData: SpotifyTokenData
 ): TE.TaskEither<Error, void> {
-  const discordUserID: DiscordId = decryptString(
-    spotifyData.requestState as string,
-    process.env.ENCRYPTION_SECRET as string
+  let secret: string = process.env.ENCRYPTION_SECRET as string;
+  const discordUserID: DiscordId = hashDiscordId(
+    decryptString(spotifyData.state as EncryptedString, secret)
   );
   const token = spotifyData.access_token;
   const refreshToken = spotifyData.refresh_token;
-  const scope = spotifyData.scope;
+  const scope: string = spotifyData.scope as string;
   const tokenExpiry = spotifyData.expires_in as number;
+  const tokenExpiryTimestamp = new Date(Date.now() + tokenExpiry * 1000);
 
   return pipe(
     TE.tryCatch(
@@ -155,14 +166,13 @@ export function saveTokenDataToDb(
     TE.chain((user) =>
       TE.tryCatch(
         () =>
-          // TODO: encrypt all database read and writes
           SpotifyToken.create({
             access_token: token,
             refresh_token: refreshToken,
             scope: scope,
             token_expiry: tokenExpiry,
+            token_expiry_timestamp: tokenExpiryTimestamp,
             discord_user_id: user.discordId,
-            discordId: discordUserID,
           }),
         (err) => new Error(`Failed to create SpotifyToken: ${err}`)
       )

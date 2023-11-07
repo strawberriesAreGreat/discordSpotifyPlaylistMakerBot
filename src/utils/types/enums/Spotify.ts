@@ -1,6 +1,8 @@
-type RequestState = string;
-type AccessToken = string;
-type RefreshToken = string;
+import { EncryptedString } from './EncryptedString';
+
+type RequestState = EncryptedString;
+type AccessToken = EncryptedString;
+type RefreshToken = EncryptedString;
 type RefreshTokenExpiresIn = number;
 type RefreshTokenExpiry = Date;
 type Scope = string;

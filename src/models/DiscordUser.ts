@@ -1,8 +1,9 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from './db';
+import { HashedString } from '../utils/types';
 
 export class DiscordUser extends Model {
-  public discordId!: string;
+  public discordId!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -10,11 +11,11 @@ export class DiscordUser extends Model {
 DiscordUser.init(
   {
     discordId: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(128),
       allowNull: false,
       primaryKey: true,
       validate: {
-        is: /^\d+$/,
+        is: /^[a-f0-9]+$/i,
       },
     },
     createdAt: {

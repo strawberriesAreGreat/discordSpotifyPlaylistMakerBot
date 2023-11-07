@@ -13,7 +13,7 @@ import {
 export interface SpotifyTokenData {
   scope?: Scope;
   code?: ResponseCode;
-  requestState?: RequestState;
+  state?: RequestState;
   access_token?: AccessToken;
   refresh_token?: RefreshToken;
   expires_in?: RefreshTokenExpiresIn;

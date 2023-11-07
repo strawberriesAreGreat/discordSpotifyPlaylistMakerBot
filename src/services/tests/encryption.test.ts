@@ -1,15 +1,15 @@
-import { decryptString, encryptString } from '../encryption';
+import { decryptString, encryptString, hashDiscordId } from '../encryption';
 import crypto from 'crypto';
 
-describe('encrpt discordID', () => {
+describe('encrpt strings', () => {
   const ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex');
 
-  const discordId = '1234567890';
-  const encryptedState = encryptString(discordId, ENCRYPTION_KEY);
+  const someString = '1234567890';
+  const encryptedState = encryptString(someString, ENCRYPTION_KEY);
   const decryptedState = decryptString(encryptedState, ENCRYPTION_KEY);
 
   it('should encrypt a string', () => {
-    expect(encryptedState).not.toEqual(discordId);
+    expect(encryptedState).not.toEqual(someString);
   });
 
   it('should decrypt a string', () => {
@@ -17,6 +17,15 @@ describe('encrpt discordID', () => {
   });
 
   it('the encryppted and decrypted strng should match', () => {
-    expect(decryptedState).toEqual(discordId);
+    expect(decryptedState).toEqual(someString);
+  });
+});
+
+describe('hashDiscordId', () => {
+  it('should return a hashed string', () => {
+    const discordId = 'testDiscordId';
+    const hashedId = hashDiscordId(discordId);
+    expect(hashedId).toBeDefined();
+    expect(hashedId).not.toEqual(discordId);
   });
 });

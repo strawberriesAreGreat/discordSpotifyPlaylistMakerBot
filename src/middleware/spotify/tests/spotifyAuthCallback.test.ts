@@ -4,7 +4,9 @@ import { validateUrl, saveTokenDataToDb } from '../spotifyAuthCallback';
 import { IncomingMessage } from 'http';
 import { DiscordUser } from '../../../models/DiscordUser';
 import { SpotifyToken } from '../../../models/SpotifyToken';
-import { decryptString } from '../../../services';
+import { decryptString, encryptString, hashDiscordId } from '../../../services';
+import { EncryptedString } from '../../../utils/types';
+import { as } from 'fp-ts/lib/Option';
 
 jest.mock('../../../models/DiscordUser');
 jest.mock('../../../models/SpotifyToken');
@@ -45,14 +47,19 @@ describe('parseUrl', () => {
 
 describe('saveTokenDataToDb()', () => {
   const mockDiscordUserID = '123456789';
-  const mockEncryptedState = 'my-encrypted-state';
-  const mockAccessToken = 'my-access-token';
-  const mockRefreshToken = 'my-refresh-token';
+  const mockHashedDiscordId: EncryptedString =
+    'hashed-discord-id' as EncryptedString;
+  const mockEncryptedState: EncryptedString =
+    'encrypted-state' as EncryptedString;
+  const mockEncryptedAccessToken: EncryptedString =
+    'access-token' as EncryptedString;
+  const mockEncryptedRefreshToken: EncryptedString =
+    'refresh-token' as EncryptedString;
   const mockScope = 'my-scope';
   const mockExpiresIn = 3600;
   const mockUser = {
     id: 1,
-    discordId: mockDiscordUserID,
+    discordId: mockHashedDiscordId,
   };
 
   beforeEach(() => {
@@ -63,15 +70,16 @@ describe('saveTokenDataToDb()', () => {
   it('should create a new DiscordUser and SpotifyToken record', async () => {
     // Set up mock dependencies
     (decryptString as jest.Mock).mockReturnValue(mockDiscordUserID);
+    (hashDiscordId as jest.Mock).mockReturnValue(mockHashedDiscordId);
     (DiscordUser.findOne as jest.Mock).mockResolvedValue(null);
     (DiscordUser.create as jest.Mock).mockResolvedValue(mockUser);
     (SpotifyToken.create as jest.Mock).mockResolvedValue(undefined);
 
     // Call saveTokenDataToDb() with mock data
     const result = await saveTokenDataToDb({
-      requestState: mockEncryptedState,
-      access_token: mockAccessToken,
-      refresh_token: mockRefreshToken,
+      state: mockEncryptedState,
+      access_token: mockEncryptedAccessToken,
+      refresh_token: mockEncryptedRefreshToken,
       scope: mockScope,
       expires_in: mockExpiresIn,
     })();
@@ -79,24 +87,30 @@ describe('saveTokenDataToDb()', () => {
     // Verify that DiscordUser.findOne() was called with the correct arguments
     expect(DiscordUser.findOne).toHaveBeenCalledWith({
       where: {
-        discordId: mockDiscordUserID,
+        discordId: mockHashedDiscordId,
       },
     });
 
     // Verify that DiscordUser.create() was called with the correct arguments
     expect(DiscordUser.create).toHaveBeenCalledWith({
-      discordId: mockDiscordUserID,
+      discordId: mockHashedDiscordId,
     });
 
     //Verify that SpotifyToken.create() was called with the correct arguments
     expect(SpotifyToken.create).toHaveBeenCalledWith({
-      access_token: mockAccessToken,
-      refresh_token: mockRefreshToken,
+      access_token: mockEncryptedAccessToken,
+      refresh_token: mockEncryptedRefreshToken,
       scope: mockScope,
-      expires_in: mockExpiresIn,
-      discord_user_id: mockDiscordUserID,
-      discordId: mockDiscordUserID,
+      token_expiry: mockExpiresIn,
+      discord_user_id: mockHashedDiscordId,
+      token_expiry_timestamp: new Date(Date.now() + mockExpiresIn * 1000),
     });
+
+    expect(decryptString).toHaveBeenCalledWith(
+      mockEncryptedState,
+      expect.any(String)
+    );
+    expect(hashDiscordId).toHaveBeenCalledWith(mockDiscordUserID);
 
     // // Verify that saveTokenDataToDb() returned a Right value
     expect(result._tag).toEqual('Right');
@@ -111,16 +125,16 @@ describe('saveTokenDataToDb()', () => {
 
     // Call saveTokenDataToDb() with mock data
     const result = await saveTokenDataToDb({
-      requestState: mockEncryptedState,
-      access_token: mockAccessToken,
-      refresh_token: mockRefreshToken,
+      state: mockEncryptedState,
+      access_token: mockEncryptedAccessToken,
+      refresh_token: mockEncryptedRefreshToken,
       scope: mockScope,
     })();
 
     // Verify that DiscordUser.findOne() was called with the correct arguments
     expect(DiscordUser.findOne).toHaveBeenCalledWith({
       where: {
-        discordId: mockDiscordUserID,
+        discordId: mockHashedDiscordId,
       },
     });
 

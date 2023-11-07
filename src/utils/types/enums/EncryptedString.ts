@@ -1,3 +1,4 @@
-type encryptedString = string;
+type EncryptedString = string & { __brand: 'encrypted' };
+type HashedString = string & { __brand: 'hashed' };
 
-export type { encryptedString };
+export type { EncryptedString, HashedString };

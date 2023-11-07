@@ -12,7 +12,7 @@ export const sequelize = new Sequelize({
 console.log('Attempting to connect to database...');
 try {
   sequelize.authenticate();
-  sequelize.sync();
+  sequelize.sync({ alter: true });
   console.log('Connection has been established successfully.');
 } catch (err) {
   console.log('Unable to connect to the database:');

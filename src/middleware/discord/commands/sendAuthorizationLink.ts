@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { encryptString } from '../../../../services';
+import { encryptString } from '../../../services';
 
 const SPOTIFY_AUTH_BASE_URL = 'https://accounts.spotify.com/authorize';
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;

@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import Discord, { Message, TextBasedChannel } from 'discord.js';
 import dotenv from 'dotenv';
-import { getURIS, addSongs } from '../../../spotify/commands';
+import { getURIS, addSongs } from '../../spotify/services';
 
 dotenv.config();
 

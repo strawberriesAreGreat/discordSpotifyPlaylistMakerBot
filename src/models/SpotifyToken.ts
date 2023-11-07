@@ -38,7 +38,7 @@ SpotifyToken.init(
       allowNull: false,
     },
     token_expiry: {
-      type: DataTypes.DATE,
+      type: DataTypes.INTEGER, // "The time period (in seconds) for which the access token is valid."
       allowNull: false,
     },
     createdAt: {

@@ -1,10 +1,14 @@
 import { Message, TextChannel, Guild } from 'discord.js';
 import axios, { AxiosResponse } from 'axios';
-import { getURIS, addSongs } from './services';
-import DiscordClient from '../discordClient';
-import { updatePlaylist, getPlaylist, createPlaylist } from './commands';
-import { sendAuthorizationLink } from './commands/sendAuthorizationLink';
-import { commandMap } from './commandDictionary';
+import { getURIS, addSongs } from '../spotify/commands';
+import DiscordClient from './discordClient';
+import {
+  updatePlaylist,
+  getPlaylist,
+  createPlaylist,
+} from './commands/commands';
+import { sendAuthorizationLink } from './commands/commands/sendAuthorizationLink';
+import { commandMap } from './commands/commandDictionary';
 
 export function eventListeners(client: DiscordClient) {
   client.on('ready', () => {

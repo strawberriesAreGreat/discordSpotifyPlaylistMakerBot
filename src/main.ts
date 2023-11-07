@@ -1,5 +1,5 @@
 import DiscordClient from './middleware/discord/discordClient';
-import { eventListeners } from './middleware/discord/helpers/listener';
+import { eventListeners } from './middleware/discord/listener';
 import server from './middleware/spotify/spotifyAuthCallback';
 
 //SpotifyAuth.getAccessToken();

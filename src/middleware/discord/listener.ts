@@ -5,6 +5,7 @@ import DiscordClient from './discordClient';
 import { updatePlaylist, getPlaylist, createPlaylist } from './commands';
 import { sendAuthorizationLink } from './commands/sendAuthorizationLink';
 import { commandMap } from './commandDictionary';
+import { discordCommand } from './discordCommand';
 
 export function eventListeners(client: DiscordClient) {
   client.on('ready', () => {
@@ -52,13 +53,9 @@ export function eventListeners(client: DiscordClient) {
   });
 
   client.on('messageCreate', async (message: Message) => {
-    const commandName = message.content.split(' ')[0];
-
-    for (let [regex, commandFunction] of commandMap) {
-      if (regex.test(commandName)) {
-        commandFunction(message);
-        break;
-      }
+    //checks if user entered a command
+    if (message.content.startsWith('!')) {
+      discordCommand(message);
     }
 
     if (message.author.bot) return;

@@ -1,6 +1,6 @@
 jest.useFakeTimers();
 import { InvalidUrlError } from '../../../utils/errors';
-import { validateUrl, saveTokenDataToDb } from '../spotifyAuthCallback';
+import { validateUrl, saveTokenDataToDb } from '../spotifyAuthServer';
 import { IncomingMessage } from 'http';
 import { DiscordUser } from '../../../models/DiscordUser';
 import { SpotifyToken } from '../../../models/SpotifyToken';

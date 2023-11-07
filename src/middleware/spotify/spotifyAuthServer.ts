@@ -8,7 +8,7 @@ import {
 } from '../../utils/errors';
 import dotenv from 'dotenv';
 import { EncryptedString, SpotifyTokenData } from '../../utils/types';
-import { saveTokenDataToDb } from './services/authorization/saveTokenToDb';
+import { saveTokenDataToDb } from '../db/saveTokenToDb';
 import { getAccessToken } from './services/authorization/getAccessToken';
 
 dotenv.config();

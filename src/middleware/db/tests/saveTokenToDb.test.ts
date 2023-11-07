@@ -1,8 +1,12 @@
-import DiscordUser from '../../../../../models/DiscordUser';
-import SpotifyToken from '../../../../../models/SpotifyToken';
-import { decryptString, hashDiscordId } from '../../../../../services';
-import { EncryptedString } from '../../../../../utils/types';
+import DiscordUser from '../../../models/DiscordUser';
+import SpotifyToken from '../../../models/SpotifyToken';
+import { decryptString, hashDiscordId } from '../../../services';
+import { EncryptedString } from '../../../utils/types';
 import { saveTokenDataToDb } from '../saveTokenToDb';
+
+jest.mock('../../../models/DiscordUser');
+jest.mock('../../../models/SpotifyToken');
+jest.mock('../../../services');
 
 describe('saveTokenDataToDb()', () => {
   const mockDiscordUserID = '123456789';
@@ -21,8 +25,12 @@ describe('saveTokenDataToDb()', () => {
     discordId: mockHashedDiscordId,
   };
 
+  let originalEnv: NodeJS.ProcessEnv;
+
   beforeEach(() => {
     // Reset mock implementations before each test
+    originalEnv = { ...process.env };
+    process.env.ENCRYPTION_SECRET = 'mock_secret';
     jest.clearAllMocks();
   });
 
@@ -62,12 +70,12 @@ describe('saveTokenDataToDb()', () => {
       scope: mockScope,
       token_expiry: mockExpiresIn,
       discord_user_id: mockHashedDiscordId,
-      token_expiry_timestamp: new Date(Date.now() + mockExpiresIn * 1000),
+      token_expiry_timestamp: new Date(Date.now() + mockExpiresIn * 1000 - 1),
     });
 
     expect(decryptString).toHaveBeenCalledWith(
       mockEncryptedState,
-      expect.any(String)
+      process.env.ENCRYPTION_SECRET
     );
     expect(hashDiscordId).toHaveBeenCalledWith(mockDiscordUserID);
 

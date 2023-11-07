@@ -1,3 +1,3 @@
 export * from './getAccessToken';
-export * from './saveTokenToDb';
+export * from '../../../db/saveTokenToDb';
 export * from './refreshAccessToken';

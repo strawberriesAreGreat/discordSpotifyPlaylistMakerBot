@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from './db';
+import { sequelize } from '../middleware/db/db';
 import DiscordUser from './DiscordUser';
 import {
   AccessToken,

@@ -1,3 +1,8 @@
+jest.mock('../../../models/DiscordUser');
+jest.mock('../../../models/SpotifyToken');
+jest.mock('../../../services');
+jest.mock('../db');
+
 import { getUser } from '../getUser';
 import { Message } from 'discord.js';
 import { DiscordUser } from '../../../models';

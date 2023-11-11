@@ -1,12 +1,13 @@
-import DiscordUser from '../../../models/DiscordUser';
+jest.mock('../../../models/DiscordUser');
+jest.mock('../../../models/SpotifyToken');
+jest.mock('../../../services');
+jest.mock('../db');
+
+import { DiscordUser } from '../../../models/DiscordUser';
 import SpotifyToken from '../../../models/SpotifyToken';
 import { decryptString, hashDiscordId } from '../../../services';
 import { EncryptedString } from '../../../utils/types';
 import { saveTokenDataToDb } from '../saveTokenToDb';
-
-jest.mock('../../../models/DiscordUser');
-jest.mock('../../../models/SpotifyToken');
-jest.mock('../../../services');
 
 describe('saveTokenDataToDb()', () => {
   const mockDiscordUserID = '123456789';
@@ -24,6 +25,15 @@ describe('saveTokenDataToDb()', () => {
     id: 1,
     discordId: mockHashedDiscordId,
   };
+  const mockSpotifyToken = {
+    id: 1,
+    access_token: mockEncryptedAccessToken,
+    refresh_token: mockEncryptedRefreshToken,
+    scope: mockScope,
+    token_expiry: mockExpiresIn,
+    token_expiry_timestamp: new Date(Date.now() + mockExpiresIn * 1000),
+    discord_user_id: mockHashedDiscordId,
+  };
 
   let originalEnv: NodeJS.ProcessEnv;
 
@@ -35,12 +45,12 @@ describe('saveTokenDataToDb()', () => {
   });
 
   it('should create a new DiscordUser and SpotifyToken record', async () => {
-    // Set up mock dependencies
-    (decryptString as jest.Mock).mockReturnValue(mockDiscordUserID);
     (hashDiscordId as jest.Mock).mockReturnValue(mockHashedDiscordId);
+    (decryptString as jest.Mock).mockReturnValue(mockDiscordUserID);
     (DiscordUser.findOne as jest.Mock).mockResolvedValue(null);
     (DiscordUser.create as jest.Mock).mockResolvedValue(mockUser);
-    (SpotifyToken.create as jest.Mock).mockResolvedValue(undefined);
+    (SpotifyToken.findOne as jest.Mock).mockResolvedValue(null);
+    (SpotifyToken.create as jest.Mock).mockResolvedValue(mockSpotifyToken);
 
     // Call saveTokenDataToDb() with mock data
     const result = await saveTokenDataToDb({
@@ -51,19 +61,16 @@ describe('saveTokenDataToDb()', () => {
       expires_in: mockExpiresIn,
     })();
 
-    // Verify that DiscordUser.findOne() was called with the correct arguments
     expect(DiscordUser.findOne).toHaveBeenCalledWith({
       where: {
         discordId: mockHashedDiscordId,
       },
     });
 
-    // Verify that DiscordUser.create() was called with the correct arguments
     expect(DiscordUser.create).toHaveBeenCalledWith({
       discordId: mockHashedDiscordId,
     });
 
-    //Verify that SpotifyToken.create() was called with the correct arguments
     expect(SpotifyToken.create).toHaveBeenCalledWith({
       access_token: mockEncryptedAccessToken,
       refresh_token: mockEncryptedRefreshToken,
@@ -79,18 +86,16 @@ describe('saveTokenDataToDb()', () => {
     );
     expect(hashDiscordId).toHaveBeenCalledWith(mockDiscordUserID);
 
-    // // Verify that saveTokenDataToDb() returned a Right value
     expect(result._tag).toEqual('Right');
   });
 
   it('should return a Left value if an error occurs', async () => {
-    // Set up mock dependencies to throw an error
+    (hashDiscordId as jest.Mock).mockReturnValue(mockHashedDiscordId);
     (decryptString as jest.Mock).mockReturnValue(mockDiscordUserID);
     (DiscordUser.findOne as jest.Mock).mockRejectedValue(
-      new Error('Database error')
+      new Error('sorry pal but i have to throw an error')
     );
 
-    // Call saveTokenDataToDb() with mock data
     const result = await saveTokenDataToDb({
       state: mockEncryptedState,
       access_token: mockEncryptedAccessToken,

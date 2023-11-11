@@ -1,3 +1,4 @@
 //TODO: Add single song to playlist
 import { Message } from 'discord.js';
-export function addSong(message: Message): void {}
+import { DiscordUser } from '../../../models';
+export function addSong(user: DiscordUser, message: Message): void {}

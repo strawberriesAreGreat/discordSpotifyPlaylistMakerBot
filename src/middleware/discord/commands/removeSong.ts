@@ -1,6 +1,7 @@
 //TODO: Removes song from playlist
 
 import { Message } from 'discord.js';
-export function removeSong(message: Message): void {
+import { DiscordUser } from '../../../models';
+export function removeSong(user: DiscordUser, message: Message): void {
   console.log('removeSong');
 }

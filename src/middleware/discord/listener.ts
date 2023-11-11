@@ -14,6 +14,7 @@ export function eventListeners(client: DiscordClient) {
   });
 
   client.on('guildCreate', (guild: Guild) => {
+    //TODO: add server to DB
     console.log('Client: guild create.');
 
     console.log(guild.id);
@@ -53,17 +54,8 @@ export function eventListeners(client: DiscordClient) {
   });
 
   client.on('messageCreate', async (message: Message) => {
-    //checks if user entered a command
     if (message.content.startsWith('!')) {
       discordCommand(message);
-    }
-
-    if (message.author.bot) return;
-
-    if (message.content.includes('https://open.spotify.com/track/')) {
-      const spotifyUris = getURIS(message.content);
-
-      addSongs(message, spotifyUris);
     }
   });
 }

@@ -18,6 +18,7 @@ export class SpotifyToken extends Model {
   public discord_user_id!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+  discordId: any;
 }
 
 SpotifyToken.init(

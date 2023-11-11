@@ -1,11 +1,10 @@
 import { Message, TextChannel, Guild } from 'discord.js';
 import axios, { AxiosResponse } from 'axios';
-import { getURIS, addSongs } from '../spotify/services';
 import DiscordClient from './discordClient';
-import { updatePlaylist, getPlaylist, createPlaylist } from './commands';
-import { sendAuthorizationLink } from './commands/sendAuthorizationLink';
-import { commandMap } from './commandDictionary';
-import { discordCommand } from './discordCommand';
+import {
+  discordCommandsUsingAuth,
+  discordCommandsNotUsingAuth,
+} from './discordCommand';
 
 export function eventListeners(client: DiscordClient) {
   client.on('ready', () => {
@@ -14,7 +13,6 @@ export function eventListeners(client: DiscordClient) {
   });
 
   client.on('guildCreate', (guild: Guild) => {
-    //TODO: add server to DB
     console.log('Client: guild create.');
 
     console.log(guild.id);
@@ -55,7 +53,9 @@ export function eventListeners(client: DiscordClient) {
 
   client.on('messageCreate', async (message: Message) => {
     if (message.content.startsWith('!')) {
-      discordCommand(message);
+      //TODO: check one then the other
+      discordCommandsNotUsingAuth(message);
+      discordCommandsUsingAuth(message);
     }
   });
 }

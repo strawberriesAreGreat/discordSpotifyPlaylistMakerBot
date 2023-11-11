@@ -6,8 +6,10 @@ import {
 import { pipe } from 'fp-ts/lib/function';
 import { getUser } from '../db/getUser';
 import * as TE from 'fp-ts/TaskEither';
-import { CommandNotFoundError } from '../../utils/errors';
 import DiscordUser from '../../models/DiscordUser';
+import * as A from 'fp-ts/lib/Array';
+import { CommandNotFoundError } from '../../utils/errors';
+import * as O from 'fp-ts/Option';
 
 // get user auth token, run command if auth token exists
 export function discordCommandsUsingAuth(message: Message): void {
@@ -42,17 +44,28 @@ export function discordCommandsNotUsingAuth(message: Message): void {
   )();
 }
 
-function runCommand([user, message]: [DiscordUser, Message]): TE.TaskEither<
-  Error,
-  void
-> {
+export function runCommand([user, message]: [
+  DiscordUser | null,
+  Message,
+]): TE.TaskEither<Error, void> {
   const commandName = message.content.split(' ')[0];
+  let commandMap: Map<any, any>;
+  let args: any[] = [];
 
-  for (let [regex, commandFunction] of registeredUserCommandMap) {
-    if (regex.test(commandName)) {
-      return TE.right(commandFunction(user, message));
-    }
-  }
+  user
+    ? (commandMap = registeredUserCommandMap) && (args = [user, message])
+    : (commandMap = unregisteredUserCommandMap) && (args = [message]);
 
-  return TE.left(new CommandNotFoundError());
+  console.log(commandMap);
+  console.log(user);
+  console.log(...args);
+
+  return pipe(
+    Array.from(commandMap),
+    A.findFirst(([regex, _]) => regex.test(commandName)),
+    O.fold(
+      () => TE.left(new CommandNotFoundError(message)),
+      (command) => TE.right(command[1](...args))
+    )
+  );
 }

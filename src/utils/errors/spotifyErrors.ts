@@ -11,8 +11,8 @@ export class SpotifyApiError extends ApiError {
   }
 }
 export class InvalidUrlError extends ApiError {
-  constructor(command: Message) {
-    super(command);
+  constructor() {
+    super();
     this.name = 'InvalidUrlError';
     this.service = 'spotify';
     this.fault = FaultType.USER;
@@ -37,16 +37,16 @@ export class InvalidAuthCodeError extends ApiError {
 }
 
 export class AccessTokenFailure extends ApiError {
-  constructor(command: Message) {
-    super(command);
+  constructor() {
+    super();
     this.name = 'AccessTokenFailure';
     this.service = 'spotify';
     this.fault = FaultType.USER;
   }
 }
 export class RefreshTokenFailure extends ApiError {
-  constructor(command: Message) {
-    super(command);
+  constructor() {
+    super();
     this.name = 'RefreshTokenFailure';
     this.service = 'spotify';
     this.fault = FaultType.USER;

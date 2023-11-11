@@ -38,7 +38,7 @@ describe('getUser', () => {
 
     expect(result).toEqual({
       _tag: 'Left',
-      left: new UserNotFoundError(),
+      left: new UserNotFoundError(message),
     });
   });
 
@@ -50,7 +50,7 @@ describe('getUser', () => {
 
     expect(result).toEqual({
       _tag: 'Left',
-      left: new DatabaseError(String(error)),
+      left: new DatabaseError(message),
     });
   });
 });

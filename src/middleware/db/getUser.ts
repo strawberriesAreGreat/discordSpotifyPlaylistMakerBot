@@ -12,12 +12,12 @@ export function getUser(
     TE.tryCatch(
       () =>
         DiscordUser.findOne({
-          where: { discord_id: hashDiscordId(message.author.id) },
+          where: { discordId: hashDiscordId(message.author.id) },
         }),
-      (err: unknown) => new DatabaseError(String(err))
+      (err: unknown) => new DatabaseError(message)
     ),
     TE.chain((user) =>
-      user ? TE.right([user, message]) : TE.left(new UserNotFoundError())
+      user ? TE.right([user, message]) : TE.left(new UserNotFoundError(message))
     )
   );
 }

@@ -21,6 +21,7 @@ export const registeredUserCommandMap = new Map<
   ],
   [/^!removesong$/i, (user, message) => commands.removeSong(user, message)],
   [/^!addsong$/i, (user, message) => commands.addSong(user, message)],
+  [/^!help$/i, (user, message) => commands.help(message)],
 ]);
 
 export const unregisteredUserCommandMap = new Map<

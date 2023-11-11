@@ -2,10 +2,12 @@ import { FaultType } from '../types';
 
 export class ApiError extends Error {
   fault: FaultType;
+  service?: string;
 
   protected constructor(message: string) {
     super(message);
-    this.name = 'CustomError';
+    this.service = 'api';
+    this.name = 'ApiError';
     this.fault = FaultType.INTERNAL;
   }
 
@@ -16,6 +18,7 @@ export class ApiError extends Error {
   toJSON(): string {
     return JSON.stringify({
       name: this.name,
+      service: this.service,
       message: this.message,
       fault: this.fault,
     });

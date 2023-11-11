@@ -1,4 +1,4 @@
-import { ApiError } from './CustomError';
+import { ApiError } from './ApiErrors';
 import { FaultType } from '../types';
 
 export class InvalidUrlError extends ApiError {

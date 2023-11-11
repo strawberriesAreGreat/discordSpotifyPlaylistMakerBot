@@ -1,13 +1,32 @@
 import { Message } from 'discord.js';
 import * as commands from './commands';
+import DiscordUser from '../../models/DiscordUser';
 
-export const commandMap = new Map<RegExp, (message: Message) => void>([
+export const registeredUserCommandMap = new Map<
+  RegExp,
+  (discordUser: DiscordUser, message: Message) => void
+>([
+  [
+    /^!createplaylist$/i,
+    (user, message) => commands.createPlaylist(user, message),
+  ],
+  [/^!getplaylist$/i, (user, message) => commands.getPlaylist(user, message)],
+  [
+    /^!createplaylist$/i,
+    (user, message) => commands.createPlaylist(user, message),
+  ],
+  [
+    /^!updateplaylist$/i,
+    (user, message) => commands.updatePlaylist(user, message),
+  ],
+  [/^!removesong$/i, (user, message) => commands.removeSong(user, message)],
+  [/^!addsong$/i, (user, message) => commands.addSong(user, message)],
+]);
+
+export const unregisteredUserCommandMap = new Map<
+  RegExp,
+  (message: Message) => void
+>([
   [/^!authorize$/i, (message) => commands.sendAuthorizationLink(message)],
-  [/^!createplaylist$/i, (message) => commands.createPlaylist(message)],
   [/^!help$/i, (message) => commands.help(message)],
-  [/^!getplaylist$/i, (message) => commands.getPlaylist(message)],
-  [/^!createplaylist$/i, (message) => commands.createPlaylist(message)],
-  [/^!updateplaylist$/i, (message) => commands.updatePlaylist(message)],
-  [/^!removesong$/i, (message) => commands.removeSong(message)],
-  [/^!addsong$/i, (message) => commands.addSong(message)],
 ]);

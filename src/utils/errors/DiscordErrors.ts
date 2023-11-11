@@ -1,19 +1,21 @@
 import { ApiError } from './ApiErrors';
 import { FaultType } from '../types';
+import { Message } from 'discord.js';
 
 export class DiscordError extends ApiError {
-  constructor(message: string) {
-    super(message);
-    this.service = 'discord';
+  constructor(command: Message) {
+    super(command);
     this.name = 'DiscordError';
+    this.service = 'discord';
     this.fault = FaultType.INTERNAL;
   }
 }
 
 export class CommandNotFoundError extends ApiError {
-  constructor() {
-    super('Command not found');
+  constructor(command: Message) {
+    super(command);
     this.name = 'CommandNotFoundError';
+    this.service = 'discord';
     this.fault = FaultType.USER;
   }
 }

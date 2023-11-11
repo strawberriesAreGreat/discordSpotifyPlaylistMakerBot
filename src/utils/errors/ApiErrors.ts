@@ -1,26 +1,26 @@
+import { Message } from 'discord.js';
 import { FaultType } from '../types';
 
 export class ApiError extends Error {
   fault: FaultType;
   service?: string;
+  command?: Message;
 
-  protected constructor(message: string) {
-    super(message);
-    this.service = 'api';
+  protected constructor(command?: Message) {
+    super();
     this.name = 'ApiError';
+    this.service = 'api';
     this.fault = FaultType.INTERNAL;
-  }
-
-  override toString(): string {
-    return `${this.name}: ${this.message}`;
+    this.command = command;
   }
 
   toJSON(): string {
     return JSON.stringify({
       name: this.name,
       service: this.service,
-      message: this.message,
       fault: this.fault,
+      command: this.command,
+      message: this.message,
     });
   }
 }

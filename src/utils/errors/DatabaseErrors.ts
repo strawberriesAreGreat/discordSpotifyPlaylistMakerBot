@@ -1,19 +1,21 @@
 import { ApiError } from './ApiErrors';
 import { FaultType } from '../types';
+import { Message } from 'discord.js';
 
 export class DatabaseError extends ApiError {
-  constructor(message: string) {
+  constructor(message: Message) {
     super(message);
-    this.service = 'db';
     this.name = 'DatabaseError';
+    this.service = 'db';
     this.fault = FaultType.INTERNAL;
   }
 }
 
 export class UserNotFoundError extends ApiError {
-  constructor() {
-    super('User not found in DB');
+  constructor(message: Message) {
+    super(message);
     this.name = 'UserNotFoundError';
+    this.service = 'db';
     this.fault = FaultType.USER;
   }
 }

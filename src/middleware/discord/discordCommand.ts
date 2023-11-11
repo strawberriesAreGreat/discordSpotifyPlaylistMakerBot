@@ -56,10 +56,6 @@ export function runCommand([user, message]: [
     ? (commandMap = registeredUserCommandMap) && (args = [user, message])
     : (commandMap = unregisteredUserCommandMap) && (args = [message]);
 
-  console.log(commandMap);
-  console.log(user);
-  console.log(...args);
-
   return pipe(
     Array.from(commandMap),
     A.findFirst(([regex, _]) => regex.test(commandName)),

@@ -1,10 +1,7 @@
 import { Message, TextChannel, Guild } from 'discord.js';
 import axios, { AxiosResponse } from 'axios';
 import DiscordClient from './discordClient';
-import {
-  discordCommandsUsingAuth,
-  discordCommandsNotUsingAuth,
-} from './discordCommand';
+import { discordCommand } from './discordCommand';
 
 export function eventListeners(client: DiscordClient) {
   client.on('ready', () => {
@@ -53,9 +50,7 @@ export function eventListeners(client: DiscordClient) {
 
   client.on('messageCreate', async (message: Message) => {
     if (message.content.startsWith('!')) {
-      //TODO: check one then the other
-      discordCommandsNotUsingAuth(message);
-      discordCommandsUsingAuth(message);
+      discordCommand(message);
     }
   });
 }

@@ -12,23 +12,7 @@ import { CommandNotFoundError } from '../../utils/errors';
 import * as O from 'fp-ts/Option';
 
 // get user auth token, run command if auth token exists
-export function discordCommandsUsingAuth(message: Message): void {
-  pipe(
-    message,
-    TE.right,
-    TE.chain(getUser),
-    TE.chain(runCommand),
-    TE.fold(
-      (err) => {
-        console.warn(err);
-        return TE.of(undefined);
-      },
-      () => TE.of(undefined)
-    )
-  )();
-}
-
-export function discordCommandsNotUsingAuth(message: Message): void {
+export function discordCommand(message: Message): void {
   pipe(
     message,
     TE.right,

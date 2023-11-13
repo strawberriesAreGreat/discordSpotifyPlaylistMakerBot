@@ -2,32 +2,69 @@ import { Message } from 'discord.js';
 import * as commands from './commands';
 import DiscordUser from '../../models/DiscordUser';
 
-export const registeredUserCommandMap = new Map<
-  RegExp,
-  (discordUser: DiscordUser, message: Message) => void
->([
+export type DiscordCommand = {
+  execute: (...args: any[]) => void;
+  requiresUser: boolean;
+};
+
+export const registeredUserCommandMap = new Map<RegExp, DiscordCommand>([
   [
     /^!createplaylist$/i,
-    (user, message) => commands.createPlaylist(user, message),
+    {
+      execute: (user, message) => commands.createPlaylist(user, message),
+      requiresUser: true,
+    },
   ],
-  [/^!getplaylist$/i, (user, message) => commands.getPlaylist(user, message)],
+  [
+    /^!getplaylist$/i,
+    {
+      execute: (user, message) => commands.getPlaylist(user, message),
+      requiresUser: true,
+    },
+  ],
   [
     /^!createplaylist$/i,
-    (user, message) => commands.createPlaylist(user, message),
+    {
+      execute: (user, message) => commands.createPlaylist(user, message),
+      requiresUser: true,
+    },
   ],
   [
     /^!updateplaylist$/i,
-    (user, message) => commands.updatePlaylist(user, message),
+    {
+      execute: (user, message) => commands.updatePlaylist(user, message),
+      requiresUser: true,
+    },
   ],
-  [/^!removesong$/i, (user, message) => commands.removeSong(user, message)],
-  [/^!addsong$/i, (user, message) => commands.addSong(user, message)],
-  [/^!help$/i, (user, message) => commands.help(message)],
+  [
+    /^!removesong$/i,
+    {
+      execute: (user, message) => commands.removeSong(user, message),
+      requiresUser: true,
+    },
+  ],
+  [
+    /^!addsong$/i,
+    {
+      execute: (user, message) => commands.addSong(user, message),
+      requiresUser: true,
+    },
+  ],
 ]);
 
-export const unregisteredUserCommandMap = new Map<
-  RegExp,
-  (message: Message) => void
->([
-  [/^!authorize$/i, (message) => commands.sendAuthorizationLink(message)],
-  [/^!help$/i, (message) => commands.help(message)],
+export const unregisteredUserCommandMap = new Map<RegExp, DiscordCommand>([
+  [
+    /^!authorize$/i,
+    {
+      execute: (message) => commands.sendAuthorizationLink(message),
+      requiresUser: false,
+    },
+  ],
+  [
+    /^!help$/i,
+    {
+      execute: (message) => commands.help(message),
+      requiresUser: false,
+    },
+  ],
 ]);

@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import {
+  CommandFunction,
   registeredUserCommandMap,
   unregisteredUserCommandMap,
 } from './commandDictionary';
@@ -10,14 +11,25 @@ import DiscordUser from '../../models/DiscordUser';
 import * as A from 'fp-ts/lib/Array';
 import { CommandNotFoundError } from '../../utils/errors';
 import * as O from 'fp-ts/Option';
+import { taskEither } from 'fp-ts';
+
+
+type context = {
+  user: DiscordUser | null;
+  message: Message;
+  command: CommandFunction;
+  args: string[];
+};
+
 
 // get user auth token, run command if auth token exists
-export function discordCommand(message: Message): void {
+export function discordCommand( message: Message ): void {
   pipe(
-    message,
+    {message} as context,
     TE.right,
-    TE.chain(getUser),
-    TE.chain(runCommand),
+    TE.chain(getCommand),
+    TE.chain(compileArgs),
+    TE.chain(runCommand)
     TE.fold(
       (err) => {
         console.warn(err);
@@ -28,13 +40,24 @@ export function discordCommand(message: Message): void {
   )();
 }
 
-export function runCommand([user, message]: [
+function getCommand({message}: context): TE.TaskEither<Error, context> {
+  const commandName = message.content.split(' ')[0];
+
+  return pipe(
+    [...unregisteredUserCommandMap, ...registeredUserCommandMap],
+    A.findFirst(([regex, _]) => regex.test(commandName)),
+    O.fold(
+      () => TE.left(new CommandNotFoundError(message)),
+      ([_,command]) => TE.right( {message: message, command: command} as context))
+    ) 
+}
+
+export function runCommand({message, command}:context [
   DiscordUser | null,
   Message,
 ]): TE.TaskEither<Error, void> {
-  const commandName = message.content.split(' ')[0];
-  let commandMap: Map<any, any>;
   let args: any[] = [];
+  
 
   user
     ? (commandMap = registeredUserCommandMap) && (args = [user, message])
@@ -47,5 +70,27 @@ export function runCommand([user, message]: [
       () => TE.left(new CommandNotFoundError(message)),
       (command) => TE.right(command[1](...args))
     )
+  );
+}
+
+function compileArgs({ message, command }: context): TE.TaskEither<Error, context> {
+  return pipe(
+    { message, command } as context,
+    TE.right,
+    TE.chain((context) => {
+      if (command.requiresUser) {
+        return pipe(
+          getUser(context.message),
+          TE.chain((user) => {
+            if (!user) {
+              context.message.channel.send('Sorry, you need to authorize your account before SpotifyPlaylistBot can run spotify commands. \nTry running the /authorize command.');
+              return TE.left(new Error('Unauthorized'));
+            }
+            return TE.right({...context, user: user[0]});
+          })
+        );
+      }
+      return TE.right(context);
+    })
   );
 }

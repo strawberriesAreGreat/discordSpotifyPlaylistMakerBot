@@ -19,7 +19,6 @@ import { registeredUserCommandMap } from '../commandDictionary';
 describe('runCommand', () => {
   const mockUser = { id: '123', username: 'testUser' };
   const mockMessageWithAuthUser = { content: '!foo' } as Message;
-  const mockMessageNoUser = { content: '!bar' } as Message;
 
   afterEach(() => {
     jest.restoreAllMocks();

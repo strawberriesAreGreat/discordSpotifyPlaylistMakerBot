@@ -44,6 +44,7 @@ export class AccessTokenFailure extends ApiError {
     this.fault = FaultType.USER;
   }
 }
+
 export class RefreshTokenFailure extends ApiError {
   constructor() {
     super();

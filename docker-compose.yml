@@ -12,8 +12,9 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/db-data
 
-  app:
+  app-prod:
     build: .
+    command: npm run start
     environment:
       DB_HOST: db
       DB_PORT: ${DB_PORT}
@@ -22,6 +23,24 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
     ports:
       - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - .:/src
+    depends_on:
+      - db
+
+  app-dev:
+    build: .
+    command: npm run dev
+    environment:
+      DB_HOST: db
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    volumes:
+      - .:/src
     depends_on:
       - db
 

@@ -4,7 +4,7 @@ import qs from 'querystring';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 
-export function getAccessToken(this: any): Promise<string> {
+export async function getAccessToken(this: any): Promise<string> {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 

@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import {
-  CommandFunction,
+  DiscordCommand,
   registeredUserCommandMap,
   unregisteredUserCommandMap,
 } from './commandDictionary';
@@ -9,27 +9,27 @@ import { getUser } from '../db/getUser';
 import * as TE from 'fp-ts/TaskEither';
 import DiscordUser from '../../models/DiscordUser';
 import * as A from 'fp-ts/lib/Array';
-import { CommandNotFoundError } from '../../utils/errors';
+import {
+  CommandNotFoundError,
+  UnauthorizedDiscordCommand,
+} from '../../utils/errors';
 import * as O from 'fp-ts/Option';
-import { taskEither } from 'fp-ts';
-
 
 type context = {
   user: DiscordUser | null;
   message: Message;
-  command: CommandFunction;
+  command: DiscordCommand;
   args: string[];
 };
 
-
 // get user auth token, run command if auth token exists
-export function discordCommand( message: Message ): void {
+export function discordCommand(message: Message): void {
   pipe(
-    {message} as context,
+    { message } as context,
     TE.right,
     TE.chain(getCommand),
     TE.chain(compileArgs),
-    TE.chain(runCommand)
+    TE.chain(runCommand),
     TE.fold(
       (err) => {
         console.warn(err);
@@ -40,7 +40,9 @@ export function discordCommand( message: Message ): void {
   )();
 }
 
-function getCommand({message}: context): TE.TaskEither<Error, context> {
+export function getCommand({
+  message,
+}: context): TE.TaskEither<Error, context> {
   const commandName = message.content.split(' ')[0];
 
   return pipe(
@@ -48,32 +50,17 @@ function getCommand({message}: context): TE.TaskEither<Error, context> {
     A.findFirst(([regex, _]) => regex.test(commandName)),
     O.fold(
       () => TE.left(new CommandNotFoundError(message)),
-      ([_,command]) => TE.right( {message: message, command: command} as context))
-    ) 
-}
-
-export function runCommand({message, command}:context [
-  DiscordUser | null,
-  Message,
-]): TE.TaskEither<Error, void> {
-  let args: any[] = [];
-  
-
-  user
-    ? (commandMap = registeredUserCommandMap) && (args = [user, message])
-    : (commandMap = unregisteredUserCommandMap) && (args = [message]);
-
-  return pipe(
-    Array.from(commandMap),
-    A.findFirst(([regex, _]) => regex.test(commandName)),
-    O.fold(
-      () => TE.left(new CommandNotFoundError(message)),
-      (command) => TE.right(command[1](...args))
+      ([_, command]) =>
+        TE.right({ message: message, command: command } as context)
     )
   );
 }
 
-function compileArgs({ message, command }: context): TE.TaskEither<Error, context> {
+// TODO: review how userNotFound is being swallowed and replaced with UnauthorizedDiscordCommand
+export function compileArgs({
+  message,
+  command,
+}: context): TE.TaskEither<Error, context> {
   return pipe(
     { message, command } as context,
     TE.right,
@@ -82,15 +69,40 @@ function compileArgs({ message, command }: context): TE.TaskEither<Error, contex
         return pipe(
           getUser(context.message),
           TE.chain((user) => {
-            if (!user) {
-              context.message.channel.send('Sorry, you need to authorize your account before SpotifyPlaylistBot can run spotify commands. \nTry running the /authorize command.');
-              return TE.left(new Error('Unauthorized'));
+            if (!user || !user[0]) {
+              let error = new UnauthorizedDiscordCommand(context.message);
+              context.message.channel.send(error.response);
+              return TE.left(error);
             }
-            return TE.right({...context, user: user[0]});
+            return TE.right({ ...context, user: user[0] });
           })
         );
       }
       return TE.right(context);
+    })
+  );
+}
+
+export function runCommand({
+  message,
+  command,
+  user,
+}: context): TE.TaskEither<Error, void> {
+  if (!command.execute) {
+    return TE.left(new Error('Command not found'));
+  }
+
+  return pipe(
+    { message, command, user },
+    TE.right,
+    TE.chain(() => {
+      try {
+        return command.requiresUser
+          ? TE.right(command.execute(user, message) as void)
+          : TE.right(command.execute(message) as void);
+      } catch (err) {
+        return TE.left(err as Error);
+      }
     })
   );
 }

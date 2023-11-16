@@ -1,33 +1,59 @@
+const authCommand = /^!authCommand/;
+const noAuthCommand = /^!noAuthCommand/;
+
+jest.mock('../commandDictionary', () => ({
+  registeredUserCommandMap: new Map([
+    [authCommand, { execute: jest.fn(), requiresUser: true }],
+  ]),
+  unregisteredUserCommandMap: new Map([
+    [noAuthCommand, { execute: jest.fn(), requiresUser: false }],
+  ]),
+}));
 jest.mock('../../../models/DiscordUser');
 jest.mock('../../../models/SpotifyToken');
 jest.mock('../../../services');
 jest.mock('../../db/db');
-const fooCommand = /^!foo/;
-const barCommand = /^!bar/;
-
-jest.mock('../commandDictionary', () => ({
-  registeredUserCommandMap: new Map([[fooCommand, jest.fn()]]),
-  unregisteredUserCommandMap: new Map([[barCommand, jest.fn()]]),
-}));
-
-import { runCommand } from '../discordCommand';
+jest.mock('../../db/getUser', () => {
+  const TE = require('fp-ts/lib/TaskEither');
+  return {
+    getUser: jest.fn((message) => TE.of([undefined, message])),
+  };
+});
+import { compileArgs, getCommand } from '../discordCommand';
 import { Message } from 'discord.js';
+import {
+  CommandNotFoundError,
+  UnauthorizedDiscordCommand,
+  UserNotFoundError,
+} from '../../../utils/errors';
+import {
+  DiscordCommand,
+  registeredUserCommandMap,
+  unregisteredUserCommandMap,
+} from '../commandDictionary';
+import { DiscordUser } from '../../../models';
 import * as E from 'fp-ts/Either';
-import { CommandNotFoundError } from '../../../utils/errors';
-import { registeredUserCommandMap } from '../commandDictionary';
+import * as TE from 'fp-ts/lib/TaskEither';
+
+type context = {
+  user: DiscordUser | null;
+  message: Message;
+  command: DiscordCommand;
+  args: string[];
+};
 
 describe('runCommand', () => {
-  const mockUser = { id: '123', username: 'testUser' };
-  const mockMessageWithAuthUser = { content: '!foo' } as Message;
+  const mockUser = { discordId: '123' } as DiscordUser;
+  const mockMessageWithAuthUser = { content: '!authCommand' } as Message;
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  // should return a CommandNotFoundError if the command is not found
-  it('should return a CommandNotFoundError if the command is not found', async () => {
+  it('Return a CommandNotFoundError if the command is not found', async () => {
     const mockMessage = { content: '!fakeCommand' } as Message;
-    const result = await runCommand([mockUser as any, mockMessage])();
+
+    const result = await getCommand({ message: mockMessage } as context)();
     expect(E.isLeft(result)).toBe(true);
     expect(result._tag).toBe('Left');
     E.fold(
@@ -36,36 +62,127 @@ describe('runCommand', () => {
     )(result);
   });
 
-  // authorized user trying to call authorized command should work
-  it('should call the authorized user command if the command is found', async () => {
-    const commandFunction = registeredUserCommandMap.get(fooCommand);
+  it('Unauthorized user trying to call authorized command should throw UnauthorizedDiscordCommand', async () => {
+    const { getUser } = require('../../db/getUser');
+    getUser.mockImplementation(
+      (mockMessage: Message) => (mockMessage: Message) =>
+        new UserNotFoundError(mockMessage)
+    );
 
-    const result = await runCommand([
-      mockUser as any,
-      mockMessageWithAuthUser,
-    ])();
+    const mockMessage = {
+      author: { id: '918' },
+      content: '!authedCommand',
+      channel: { send: jest.fn() },
+    } as unknown as Message;
+
+    const commandFunction = registeredUserCommandMap.get(authCommand);
+
+    const result = await compileArgs({
+      message: mockMessage,
+      command: commandFunction,
+    } as context)();
+
+    expect(E.isLeft(result)).toBe(true);
+    expect(result._tag).toBe('Left');
+    E.fold(
+      (error) => expect(error).toBeInstanceOf(UnauthorizedDiscordCommand),
+      () => fail('Expected a Left, but got a Right')
+    )(result);
+  });
+
+  it('Unauthorized user trying to call unauthorized command should run command', async () => {
+    const { getUser } = require('../../db/getUser');
+    getUser.mockImplementation(
+      (mockMessage: Message) => new UserNotFoundError(mockMessage)
+    );
+
+    const mockMessage = {
+      author: { id: '918' },
+      content: '!noAuthCommand',
+      channel: { send: jest.fn() },
+    } as unknown as Message;
+
+    const commandFunction = unregisteredUserCommandMap.get(noAuthCommand);
+
+    const result = await compileArgs({
+      message: mockMessage,
+      command: commandFunction,
+    } as context)();
 
     expect(E.isRight(result)).toBe(true);
     expect(result._tag).toBe('Right');
     E.fold(
-      (error) => fail('Expected a Right, but got a Left with error: ' + error),
-      (result) => expect(result).toEqual(undefined)
+      () => fail('Expected a Right, but got a Left'),
+      (result) =>
+        // Note that no user is returned for auth command that doesn't require auth
+        expect(result).toEqual({
+          message: mockMessage,
+          command: commandFunction,
+        })
     )(result);
-    expect(commandFunction).toHaveBeenCalledWith(
-      mockUser,
-      mockMessageWithAuthUser
-    );
   });
 
-  // unauthorized user trying to call authorized command should fail
-  it('should not call the authorized user command with unauthorized user', async () => {
-    const result = await runCommand([null, mockMessageWithAuthUser])();
+  it('Authorized user trying to call authorized command should run command', async () => {
+    const { getUser } = require('../../db/getUser');
+    getUser.mockImplementation((mockMessage: Message) =>
+      TE.of([mockUser, mockMessage])
+    );
 
-    expect(E.isLeft(result)).toBe(true);
-    expect(result._tag).toBe('Left');
+    const mockMessage = {
+      author: { id: '918' },
+      content: '!authedCommand',
+      channel: { send: jest.fn() },
+    } as unknown as Message;
+
+    const commandFunction = registeredUserCommandMap.get(authCommand);
+
+    const result = await compileArgs({
+      message: mockMessage,
+      command: commandFunction,
+    } as context)();
+
+    expect(E.isRight(result)).toBe(true);
+    expect(result._tag).toBe('Right');
     E.fold(
-      (error) => expect(error).toBeInstanceOf(CommandNotFoundError),
-      () => fail('Expected a Left, but got a Right')
+      () => fail('Expected a Right, but got a Left'),
+      (result) =>
+        expect(result).toEqual({
+          message: mockMessage,
+          command: commandFunction,
+          user: mockUser,
+        })
+    )(result);
+  });
+
+  it('Authorized user trying to call unauthorized command should run command', async () => {
+    const { getUser } = require('../../db/getUser');
+    getUser.mockImplementation((mockMessage: Message) =>
+      TE.of([mockUser, mockMessage])
+    );
+
+    const mockMessage = {
+      author: { id: '918' },
+      content: '!noAuthCommand',
+      channel: { send: jest.fn() },
+    } as unknown as Message;
+
+    const commandFunction = unregisteredUserCommandMap.get(noAuthCommand);
+
+    const result = await compileArgs({
+      message: mockMessage,
+      command: commandFunction,
+    } as context)();
+
+    expect(E.isRight(result)).toBe(true);
+    expect(result._tag).toBe('Right');
+    E.fold(
+      () => fail('Expected a Right, but got a Left'),
+      (result) =>
+        // Note that no user is returned for auth command that doesn't require auth
+        expect(result).toEqual({
+          message: mockMessage,
+          command: commandFunction,
+        })
     )(result);
   });
 });

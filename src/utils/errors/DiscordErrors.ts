@@ -13,6 +13,17 @@ export class DiscordError extends ApiError {
   }
 }
 
+export class UnauthorizedDiscordCommand extends DiscordError {
+  constructor(command: Message) {
+    super(command);
+    this.name = 'UnauthorizedDiscordCommand';
+    this.service = 'discord';
+    this.fault = FaultType.USER;
+    this.response =
+      'Sorry, you need to authorize your account before SpotifyPlaylistBot can run spotify commands. \nTry running the /authorize command.';
+  }
+}
+
 export class CommandNotFoundError extends ApiError {
   constructor(command: Message) {
     super(command);

@@ -9,8 +9,9 @@
     "test": "jest",
     "sequelize": "sequelize db:migrate",
     "docker:start:prod": "docker-compose up --build app-prod",
-    "docker:start:dev": "docker-compose up --build app-dev"
-
+    "docker:start:dev": "docker-compose up --build app-dev",
+    "todo": "leasot -x --reporter markdown 'src/**/*.ts' > TODO.md",
+    "generate-docs": "tree -I 'node_modules|dist' > documents.md && leasot -x --reporter markdown 'src/**/*.ts' >> document.md"
   },
   "dependencies": {
     "@discordjs/rest": "^2.0.1",

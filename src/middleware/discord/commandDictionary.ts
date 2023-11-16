@@ -6,7 +6,6 @@ export type DiscordCommand = {
   execute: (...args: any[]) => void;
   requiresUser: boolean;
 };
-
 export const registeredUserCommandMap = new Map<RegExp, DiscordCommand>([
   [
     /^!createplaylist$/i,

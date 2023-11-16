@@ -7,7 +7,10 @@ import { DatabaseError, UserNotFoundError } from '../../utils/errors';
 
 export function getUser(
   message: Message
-): TE.TaskEither<Error, [DiscordUser, Message]> {
+): TE.TaskEither<
+  DatabaseError | UserNotFoundError,
+  [DiscordUser | undefined, Message]
+> {
   return pipe(
     TE.tryCatch(
       () =>

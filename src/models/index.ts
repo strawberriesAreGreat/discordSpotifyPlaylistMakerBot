@@ -1,5 +1,5 @@
 //export * from './errors';
 export * from './SpotifyToken';
-export * from './DiscordUser';
+export * from './DiscordUsers';
 //export * from './Playlist';
 //export * from './Song';

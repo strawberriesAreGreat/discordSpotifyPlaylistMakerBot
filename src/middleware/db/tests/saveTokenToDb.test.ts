@@ -3,7 +3,7 @@ jest.mock('../../../models/SpotifyToken');
 jest.mock('../../../services');
 jest.mock('../db');
 
-import { DiscordUser } from '../../../models/DiscordUser';
+import { DiscordUser } from '../../../models/DiscordUsers';
 import SpotifyToken from '../../../models/SpotifyToken';
 import { decryptString, hashDiscordId } from '../../../services';
 import { EncryptedString } from '../../../utils/types';

@@ -7,7 +7,7 @@ import {
 import { pipe } from 'fp-ts/lib/function';
 import { getUser } from '../db/getUser';
 import * as TE from 'fp-ts/TaskEither';
-import DiscordUser from '../../models/DiscordUser';
+import DiscordUser from '../../models/DiscordUsers';
 import * as A from 'fp-ts/lib/Array';
 import {
   CommandNotFoundError,

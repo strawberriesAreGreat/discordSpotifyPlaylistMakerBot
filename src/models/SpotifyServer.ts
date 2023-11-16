@@ -2,18 +2,26 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
 import { HashedString } from '../utils/types';
 
-export class DiscordUser extends Model {
-  public discordId!: HashedString;
+export class SpotifyServer extends Model {
+  public id!: number;
+  public serverID!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
 
-DiscordUser.init(
+SpotifyServer.init(
   {
-    discordId: {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      allowNull: false,
+      primaryKey: true,
+    },
+    serverId: {
       type: DataTypes.STRING(128),
       allowNull: false,
       primaryKey: true,
+      unique: true,
       validate: {
         is: /^[a-f0-9]+$/i,
       },
@@ -27,8 +35,6 @@ DiscordUser.init(
   },
   {
     sequelize,
-    modelName: 'DiscordUser',
+    modelName: 'SpotifyServer',
   }
 );
-
-export default DiscordUser;

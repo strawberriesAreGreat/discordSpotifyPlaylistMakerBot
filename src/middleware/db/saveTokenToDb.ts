@@ -5,7 +5,7 @@ import {
   SpotifyTokenData,
 } from '../../utils/types';
 import { decryptString, hashDiscordId } from '../../services';
-import DiscordUser from '../../models/DiscordUser';
+import DiscordUser from '../../models/DiscordUsers';
 import { pipe } from 'fp-ts/function';
 import SpotifyToken from '../../models/SpotifyToken';
 

@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
-import DiscordUser from './DiscordUser';
+import DiscordUser from './DiscordUsers';
 import {
   AccessToken,
   RefreshToken,
@@ -10,12 +10,12 @@ import {
 
 export class SpotifyToken extends Model {
   public id!: number;
-  public access_token!: AccessToken;
+  public accessToken!: AccessToken;
   public scope!: Scope;
-  public refresh_token!: RefreshToken;
-  public token_expiry!: RefreshTokenExpiry;
-  public token_expiry_timestamp!: Date;
-  public discord_user_id!: string;
+  public refreshToken!: RefreshToken;
+  public tokenExpiry!: RefreshTokenExpiry;
+  public tokenExpiryTimestamp!: Date;
+  public discordUserId!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   discordId: any;
@@ -28,7 +28,7 @@ SpotifyToken.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    access_token: {
+    accessToken: {
       type: DataTypes.STRING(1024),
       allowNull: false,
     },
@@ -36,24 +36,24 @@ SpotifyToken.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    refresh_token: {
+    refreshToken: {
       type: DataTypes.STRING(1024),
       allowNull: false,
     },
-    token_expiry: {
+    tokenExpiry: {
       type: DataTypes.INTEGER, // "The time period (in seconds) for which the access token is valid."
       allowNull: false,
     },
-    token_expiry_timestamp: {
+    tokenExpiryTimestamp: {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    discord_user_id: {
-      type: DataTypes.STRING(128),
+    discordUserId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: DiscordUser,
-        key: 'discordId',
+        key: 'id',
       },
     },
     createdAt: {
@@ -70,7 +70,7 @@ SpotifyToken.init(
 );
 
 DiscordUser.hasOne(SpotifyToken, {
-  foreignKey: 'discord_user_id',
+  foreignKey: 'discordUserID',
 });
 
 export default SpotifyToken;

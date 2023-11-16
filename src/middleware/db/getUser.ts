@@ -1,6 +1,6 @@
 import * as TE from 'fp-ts/TaskEither';
 import { hashDiscordId } from '../../services';
-import DiscordUser from '../../models/DiscordUser';
+import DiscordUser from '../../models/DiscordUsers';
 import { pipe } from 'fp-ts/function';
 import { Message } from 'discord.js';
 import { DatabaseError, UserNotFoundError } from '../../utils/errors';

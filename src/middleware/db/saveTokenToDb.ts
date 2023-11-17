@@ -5,27 +5,34 @@ import {
   SpotifyTokenData,
 } from '../../utils/types';
 import { decryptString, hashDiscordId } from '../../services';
-import DiscordUser from '../../models/DiscordUsers';
+import DiscordUsers from '../../models/DiscordUsers';
 import { pipe } from 'fp-ts/function';
-import SpotifyToken from '../../models/SpotifyToken';
+import SpotifyTokens from '../../models/SpotifyTokens';
 
 export function saveTokenDataToDb(
-  spotifyData: SpotifyTokenData
+  spotifyData: SpotifyTokenData,
+  discordId?: DiscordId
 ): TE.TaskEither<Error, void> {
   let secret: string = process.env.ENCRYPTION_SECRET as string;
-  const discordUserID: DiscordId = hashDiscordId(
-    decryptString(spotifyData.state as EncryptedString, secret)
-  );
   const token = spotifyData.access_token;
   const refreshToken = spotifyData.refresh_token;
   const scope: string = spotifyData.scope as string;
   const tokenExpiry = spotifyData.expires_in as number;
   const tokenExpiryTimestamp = new Date(Date.now() + tokenExpiry * 1000);
+  let discordUserID = discordId
+    ? discordId
+    : hashDiscordId(
+        decryptString(spotifyData.state as EncryptedString, secret)
+      );
+
+  if (discordUserID === undefined) {
+    throw new Error('Failed to get discordUserID');
+  }
 
   return pipe(
     TE.tryCatch(
       () =>
-        DiscordUser.findOne({
+        DiscordUsers.findOne({
           where: {
             discordId: discordUserID,
           },
@@ -37,7 +44,7 @@ export function saveTokenDataToDb(
         ? TE.right(user)
         : TE.tryCatch(
             () =>
-              DiscordUser.create({
+              DiscordUsers.create({
                 discordId: discordUserID,
               }),
             (err) => new Error(`Failed to create DiscordUser: ${err}`)
@@ -46,7 +53,7 @@ export function saveTokenDataToDb(
     TE.chain((user) =>
       TE.tryCatch(
         () =>
-          SpotifyToken.findOne({
+          SpotifyTokens.findOne({
             where: {
               discord_user_id: user.discordId,
             },
@@ -57,7 +64,7 @@ export function saveTokenDataToDb(
     TE.chain((spotifyToken) =>
       TE.tryCatch(
         async () => {
-          SpotifyToken.update(
+          SpotifyTokens.update(
             {
               access_token: token,
               refresh_token: refreshToken,
@@ -81,7 +88,7 @@ export function saveTokenDataToDb(
         ? TE.right(spotifyToken)
         : TE.tryCatch(
             () =>
-              SpotifyToken.create({
+              SpotifyTokens.create({
                 access_token: token,
                 refresh_token: refreshToken,
                 scope: scope,

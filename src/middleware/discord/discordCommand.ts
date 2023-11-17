@@ -1,6 +1,5 @@
 import { Message } from 'discord.js';
 import {
-  DiscordCommand,
   registeredUserCommandMap,
   unregisteredUserCommandMap,
 } from './commandDictionary';
@@ -14,18 +13,13 @@ import {
   UnauthorizedDiscordCommand,
 } from '../../utils/errors';
 import * as O from 'fp-ts/Option';
-
-type context = {
-  user: DiscordUser | null;
-  message: Message;
-  command: DiscordCommand;
-  args: string[];
-};
+import SpotifyToken from '../../models/__mocks__/SpotifyToken';
+import { DiscordUserData } from '../../utils/types/interfaces';
 
 // get user auth token, run command if auth token exists
 export function discordCommand(message: Message): void {
   pipe(
-    { message } as context,
+    { message } as DiscordUserData,
     TE.right,
     TE.chain(getCommand),
     TE.chain(compileArgs),
@@ -42,7 +36,7 @@ export function discordCommand(message: Message): void {
 
 export function getCommand({
   message,
-}: context): TE.TaskEither<Error, context> {
+}: DiscordUserData): TE.TaskEither<Error, DiscordUserData> {
   const commandName = message.content.split(' ')[0];
 
   return pipe(
@@ -51,7 +45,7 @@ export function getCommand({
     O.fold(
       () => TE.left(new CommandNotFoundError(message)),
       ([_, command]) =>
-        TE.right({ message: message, command: command } as context)
+        TE.right({ message: message, command: command } as DiscordUserData)
     )
   );
 }
@@ -60,25 +54,27 @@ export function getCommand({
 export function compileArgs({
   message,
   command,
-}: context): TE.TaskEither<Error, context> {
+}: DiscordUserData): TE.TaskEither<Error, DiscordUserData> {
   return pipe(
-    { message, command } as context,
+    { message, command } as DiscordUserData,
     TE.right,
-    TE.chain((context) => {
+    TE.chain((DiscordUserData) => {
       if (command.requiresUser) {
         return pipe(
-          getUser(context.message),
+          getUser(DiscordUserData.message),
           TE.chain((user) => {
             if (!user || !user[0]) {
-              let error = new UnauthorizedDiscordCommand(context.message);
-              context.message.channel.send(error.response);
+              let error = new UnauthorizedDiscordCommand(
+                DiscordUserData.message
+              );
+              DiscordUserData.message.channel.send(error.response);
               return TE.left(error);
             }
-            return TE.right({ ...context, user: user[0] });
+            return TE.right({ ...DiscordUserData, user: user[0] });
           })
         );
       }
-      return TE.right(context);
+      return TE.right(DiscordUserData);
     })
   );
 }
@@ -87,7 +83,8 @@ export function runCommand({
   message,
   command,
   user,
-}: context): TE.TaskEither<Error, void> {
+  token,
+}: DiscordUserData): TE.TaskEither<Error, void> {
   if (!command.execute) {
     return TE.left(new Error('Command not found'));
   }

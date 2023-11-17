@@ -27,20 +27,13 @@ import {
   UserNotFoundError,
 } from '../../../utils/errors';
 import {
-  DiscordCommand,
   registeredUserCommandMap,
   unregisteredUserCommandMap,
 } from '../commandDictionary';
 import { DiscordUser } from '../../../models';
 import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
-
-type context = {
-  user: DiscordUser | null;
-  message: Message;
-  command: DiscordCommand;
-  args: string[];
-};
+import { DiscordUserData } from '../../../utils/types/interfaces';
 
 describe('runCommand', () => {
   const mockUser = { discordId: '123' } as DiscordUser;
@@ -53,7 +46,9 @@ describe('runCommand', () => {
   it('Return a CommandNotFoundError if the command is not found', async () => {
     const mockMessage = { content: '!fakeCommand' } as Message;
 
-    const result = await getCommand({ message: mockMessage } as context)();
+    const result = await getCommand({
+      message: mockMessage,
+    } as DiscordUserData)();
     expect(E.isLeft(result)).toBe(true);
     expect(result._tag).toBe('Left');
     E.fold(
@@ -80,7 +75,7 @@ describe('runCommand', () => {
     const result = await compileArgs({
       message: mockMessage,
       command: commandFunction,
-    } as context)();
+    } as DiscordUserData)();
 
     expect(E.isLeft(result)).toBe(true);
     expect(result._tag).toBe('Left');
@@ -107,7 +102,7 @@ describe('runCommand', () => {
     const result = await compileArgs({
       message: mockMessage,
       command: commandFunction,
-    } as context)();
+    } as DiscordUserData)();
 
     expect(E.isRight(result)).toBe(true);
     expect(result._tag).toBe('Right');
@@ -139,7 +134,7 @@ describe('runCommand', () => {
     const result = await compileArgs({
       message: mockMessage,
       command: commandFunction,
-    } as context)();
+    } as DiscordUserData)();
 
     expect(E.isRight(result)).toBe(true);
     expect(result._tag).toBe('Right');
@@ -171,7 +166,7 @@ describe('runCommand', () => {
     const result = await compileArgs({
       message: mockMessage,
       command: commandFunction,
-    } as context)();
+    } as DiscordUserData)();
 
     expect(E.isRight(result)).toBe(true);
     expect(result._tag).toBe('Right');

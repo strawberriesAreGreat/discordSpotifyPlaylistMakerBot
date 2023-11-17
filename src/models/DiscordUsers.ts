@@ -7,6 +7,18 @@ export class DiscordUser extends Model {
   public discordId!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public static async findOrCreateByDiscordId(
+    discordId: HashedString
+  ): Promise<DiscordUser> {
+    const [user, created] = await DiscordUser.findOrCreate({
+      where: {
+        discordId,
+      },
+    });
+
+    return user;
+  }
 }
 
 DiscordUser.init(

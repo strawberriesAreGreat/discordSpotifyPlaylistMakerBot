@@ -3,6 +3,7 @@ import { sequelize } from '../middleware/db/db';
 import DiscordUser from './DiscordUsers';
 import {
   AccessToken,
+  HashedString,
   RefreshToken,
   RefreshTokenExpiry,
   Scope,
@@ -15,10 +16,53 @@ export class SpotifyToken extends Model {
   public refreshToken!: RefreshToken;
   public tokenExpiry!: RefreshTokenExpiry;
   public tokenExpiryTimestamp!: Date;
-  public discordUserId!: string;
+  public discordUserId!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
-  discordId: any;
+
+  public static async getAccessToken(
+    discordId: HashedString
+  ): Promise<AccessToken | null> {
+    const token = await SpotifyToken.findOne({
+      where: { discordUserId: discordId },
+    });
+    if (token) {
+      return token.accessToken;
+    }
+    return null;
+  }
+
+  public static async getRefreshToken(
+    discordId: HashedString
+  ): Promise<RefreshToken | null> {
+    const token = await SpotifyToken.findOne({
+      where: { discordUserId: discordId },
+    });
+    if (token) {
+      return token.refreshToken;
+    }
+    return null;
+  }
+
+  public static async updateRefreshToken(
+    discordId: HashedString,
+    refreshToken: RefreshToken
+  ): Promise<void> {
+    await SpotifyToken.update(
+      { refreshToken: refreshToken },
+      { where: { discordUserId: discordId } }
+    );
+  }
+
+  public static async updateAccessToken(
+    discordId: HashedString,
+    accessToken: AccessToken
+  ): Promise<void> {
+    await SpotifyToken.update(
+      { accessToken: accessToken },
+      { where: { discordUserId: discordId } }
+    );
+  }
 }
 
 SpotifyToken.init(

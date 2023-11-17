@@ -1,12 +1,20 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
 import { DiscordServer } from './DiscordServer';
-
+import { HashedString } from '../utils/types';
 export class DiscordChannel extends Model {
   public id!: number;
-  public channelId!: string;
+  public channelId!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  findOrCreateByServerId(serverId: HashedString) {
+    return DiscordChannel.findOrCreate({
+      where: {
+        serverId,
+      },
+    });
+  }
 }
 
 DiscordChannel.init(

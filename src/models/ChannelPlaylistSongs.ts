@@ -7,9 +7,23 @@ export class ChannelPlaylistSongs extends Model {
   public id!: number;
   public channelPlaylistId!: number;
   public songId!: number;
-  public addedByUser!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public static async findOrCreateByChannelPlaylistIdandSongId(
+    channelPlaylistId: number,
+    songId: number
+  ) {
+    const [channelPlaylistSong, created] =
+      await ChannelPlaylistSongs.findOrCreate({
+        where: {
+          channelPlaylistId,
+          songId,
+        },
+      });
+
+    return channelPlaylistSong;
+  }
 }
 
 ChannelPlaylistSongs.init(
@@ -34,14 +48,6 @@ ChannelPlaylistSongs.init(
       allowNull: false,
       references: {
         model: 'SpotifySongs',
-        key: 'id',
-      },
-    },
-    addedByUser: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'DiscordUsers',
         key: 'id',
       },
     },

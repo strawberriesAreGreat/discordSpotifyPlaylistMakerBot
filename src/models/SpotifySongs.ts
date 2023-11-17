@@ -21,6 +21,34 @@ export class SpotifySongs extends Model {
   public time_signature!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public static async findOrCreateBySongURI(songURI: string) {
+    const [song, created] = await SpotifySongs.findOrCreate({
+      where: {
+        uri: songURI,
+      },
+    });
+
+    return song;
+  }
+
+  public static async getSong(songURI: string): Promise<SpotifySongs | null> {
+    return await SpotifySongs.findOne({
+      where: {
+        uri: songURI,
+      },
+    });
+  }
+
+  public static async getSongById(
+    songId: number
+  ): Promise<SpotifySongs | null> {
+    return await SpotifySongs.findOne({
+      where: {
+        id: songId,
+      },
+    });
+  }
 }
 SpotifySongs.init(
   {

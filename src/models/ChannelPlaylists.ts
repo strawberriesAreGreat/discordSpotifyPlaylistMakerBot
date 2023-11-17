@@ -9,6 +9,15 @@ export class DiscordChannelPlaylists extends Model {
   public userId!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  findOrCreateByChannelIdandUserId(channelId: number, userId: number) {
+    return DiscordChannelPlaylists.findOrCreate({
+      where: {
+        channelId,
+        userId,
+      },
+    });
+  }
 }
 
 DiscordChannelPlaylists.init(

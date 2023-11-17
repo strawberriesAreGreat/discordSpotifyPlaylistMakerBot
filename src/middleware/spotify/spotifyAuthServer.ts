@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import { EncryptedString, SpotifyTokenData } from '../../utils/types';
 import { saveTokenDataToDb } from '../db/saveTokenToDb';
 import { getAccessToken } from './services/authorization/getAccessToken';
+import { refreshAccessToken } from './services/authorization/refreshAccessToken';
 
 dotenv.config();
 

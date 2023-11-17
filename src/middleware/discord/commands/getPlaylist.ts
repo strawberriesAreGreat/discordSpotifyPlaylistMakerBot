@@ -1,11 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
 import Discord, { Message } from 'discord.js';
 import dotenv from 'dotenv';
-DiscordUsers from '../../../models/DiscordUsers';
+import { DiscordUsers } from '../../../models';
 
 dotenv.config();
 
-export async function getPlaylist(user: DiscordUser, message: Message) {
+export async function getPlaylist(user: DiscordUsers, message: Message) {
   if (message.content.includes('!playlist' || '!Playlist')) {
     axios
       .get(`${process.env.API_URL}playlists/${message.guildId}`)

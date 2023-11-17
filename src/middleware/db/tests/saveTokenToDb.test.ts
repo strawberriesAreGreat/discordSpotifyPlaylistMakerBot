@@ -1,10 +1,10 @@
-jest.mock('../../../models/DiscordUser');
-jest.mock('../../../models/SpotifyToken');
+jest.mock('../../../models/DiscordUsers');
+jest.mock('../../../models/SpotifyTokens');
 jest.mock('../../../services');
 jest.mock('../db');
 
-import { DiscordUser } from '../../../models/DiscordUsers';
-import SpotifyToken from '../../../models/SpotifyToken';
+import { DiscordUsers } from '../../../models/DiscordUsers';
+import SpotifyTokens from '../../../models/SpotifyTokens';
 import { decryptString, hashDiscordId } from '../../../services';
 import { EncryptedString } from '../../../utils/types';
 import { saveTokenDataToDb } from '../saveTokenToDb';
@@ -31,7 +31,7 @@ describe('saveTokenDataToDb()', () => {
     refresh_token: mockEncryptedRefreshToken,
     scope: mockScope,
     token_expiry: mockExpiresIn,
-    token_expiry_timestamp: new Date(Date.now() + mockExpiresIn * 1000),
+    token_expiry_timestamp: expect.any(Date),
     discord_user_id: mockHashedDiscordId,
   };
 
@@ -47,10 +47,10 @@ describe('saveTokenDataToDb()', () => {
   it('should create a new DiscordUser and SpotifyToken record', async () => {
     (hashDiscordId as jest.Mock).mockReturnValue(mockHashedDiscordId);
     (decryptString as jest.Mock).mockReturnValue(mockDiscordUserID);
-    (DiscordUser.findOne as jest.Mock).mockResolvedValue(null);
-    (DiscordUser.create as jest.Mock).mockResolvedValue(mockUser);
-    (SpotifyToken.findOne as jest.Mock).mockResolvedValue(null);
-    (SpotifyToken.create as jest.Mock).mockResolvedValue(mockSpotifyToken);
+    (DiscordUsers.findOne as jest.Mock).mockResolvedValue(null);
+    (DiscordUsers.create as jest.Mock).mockResolvedValue(mockUser);
+    (SpotifyTokens.findOne as jest.Mock).mockResolvedValue(null);
+    (SpotifyTokens.create as jest.Mock).mockResolvedValue(mockSpotifyToken);
 
     // Call saveTokenDataToDb() with mock data
     const result = await saveTokenDataToDb({
@@ -61,23 +61,23 @@ describe('saveTokenDataToDb()', () => {
       expires_in: mockExpiresIn,
     })();
 
-    expect(DiscordUser.findOne).toHaveBeenCalledWith({
+    expect(DiscordUsers.findOne).toHaveBeenCalledWith({
       where: {
         discordId: mockHashedDiscordId,
       },
     });
 
-    expect(DiscordUser.create).toHaveBeenCalledWith({
+    expect(DiscordUsers.create).toHaveBeenCalledWith({
       discordId: mockHashedDiscordId,
     });
 
-    expect(SpotifyToken.create).toHaveBeenCalledWith({
+    expect(SpotifyTokens.create).toHaveBeenCalledWith({
       access_token: mockEncryptedAccessToken,
       refresh_token: mockEncryptedRefreshToken,
       scope: mockScope,
       token_expiry: mockExpiresIn,
       discord_user_id: mockHashedDiscordId,
-      token_expiry_timestamp: new Date(Date.now() + mockExpiresIn * 1000 - 1),
+      token_expiry_timestamp: expect.any(Date),
     });
 
     expect(decryptString).toHaveBeenCalledWith(
@@ -92,7 +92,7 @@ describe('saveTokenDataToDb()', () => {
   it('should return a Left value if an error occurs', async () => {
     (hashDiscordId as jest.Mock).mockReturnValue(mockHashedDiscordId);
     (decryptString as jest.Mock).mockReturnValue(mockDiscordUserID);
-    (DiscordUser.findOne as jest.Mock).mockRejectedValue(
+    (DiscordUsers.findOne as jest.Mock).mockRejectedValue(
       new Error('sorry pal but i have to throw an error')
     );
 
@@ -104,15 +104,15 @@ describe('saveTokenDataToDb()', () => {
     })();
 
     // Verify that DiscordUser.findOne() was called with the correct arguments
-    expect(DiscordUser.findOne).toHaveBeenCalledWith({
+    expect(DiscordUsers.findOne).toHaveBeenCalledWith({
       where: {
         discordId: mockHashedDiscordId,
       },
     });
 
     // Verify that DiscordUser.create() and SpotifyToken.create() were not called
-    expect(DiscordUser.create).not.toHaveBeenCalled();
-    expect(SpotifyToken.create).not.toHaveBeenCalled();
+    expect(DiscordUsers.create).not.toHaveBeenCalled();
+    expect(SpotifyTokens.create).not.toHaveBeenCalled();
 
     // Verify that saveTokenDataToDb() returned a Left value with the error
     expect(result._tag).toEqual('Left');

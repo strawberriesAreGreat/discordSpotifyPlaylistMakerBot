@@ -3,8 +3,8 @@ import { InvalidUrlError } from '../../../utils/errors';
 import { validateUrl } from '../spotifyAuthServer';
 import { IncomingMessage } from 'http';
 
-jest.mock('../../../models/DiscordUser');
-jest.mock('../../../models/SpotifyToken');
+jest.mock('../../../models/DiscordUsers');
+jest.mock('../../../models/SpotifyTokens');
 jest.mock('../../../services');
 
 describe('parseUrl', () => {

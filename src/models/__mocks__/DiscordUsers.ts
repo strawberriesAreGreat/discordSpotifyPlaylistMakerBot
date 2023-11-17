@@ -2,7 +2,8 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../../middleware/db/db';
 import { HashedString } from '../../utils/types';
 
-export class DiscordUser extends Model {
+export class DiscordUsers extends Model {
+  public id!: number;
   public discordId!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -12,4 +13,4 @@ export class DiscordUser extends Model {
   static create = jest.fn();
 }
 
-export default DiscordUser;
+export default DiscordUsers;

@@ -1,11 +1,11 @@
 import axios, { AxiosResponse } from 'axios';
 import Discord, { Message } from 'discord.js';
 import dotenv from 'dotenv';
-import { DiscordUser } from '../../../models';
+import { DiscordUsers } from '../../../models';
 
 dotenv.config();
 
-export async function createPlaylist(user: DiscordUser, message: Message) {
+export async function createPlaylist(user: DiscordUsers, message: Message) {
   console.log('Creating playlist');
   const args = message.content.split(' ');
 

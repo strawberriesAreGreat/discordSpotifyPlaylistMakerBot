@@ -2,7 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
 import { HashedString } from '../utils/types';
 
-export class DiscordUser extends Model {
+export class DiscordUsers extends Model {
   public id!: number;
   public discordId!: HashedString;
   public readonly createdAt!: Date;
@@ -10,8 +10,8 @@ export class DiscordUser extends Model {
 
   public static async findOrCreateByDiscordId(
     discordId: HashedString
-  ): Promise<DiscordUser> {
-    const [user, created] = await DiscordUser.findOrCreate({
+  ): Promise<DiscordUsers> {
+    const [user, created] = await DiscordUsers.findOrCreate({
       where: {
         discordId,
       },
@@ -21,7 +21,7 @@ export class DiscordUser extends Model {
   }
 }
 
-DiscordUser.init(
+DiscordUsers.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -48,8 +48,8 @@ DiscordUser.init(
   },
   {
     sequelize,
-    modelName: 'DiscordUser',
+    modelName: 'DiscordUsers',
   }
 );
 
-export default DiscordUser;
+export default DiscordUsers;

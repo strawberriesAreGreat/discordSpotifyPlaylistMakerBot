@@ -1,11 +1,11 @@
-jest.mock('../../../models/DiscordUser');
-jest.mock('../../../models/SpotifyToken');
+jest.mock('../../../models/DiscordUsers');
+jest.mock('../../../models/SpotifyTokens');
 jest.mock('../../../services');
 jest.mock('../db');
 
 import { getUser } from '../getUser';
 import { Message } from 'discord.js';
-import { DiscordUser } from '../../../models';
+import { DiscordUsers } from '../../../models';
 import { pipe } from 'fp-ts/lib/function';
 import { DatabaseError, UserNotFoundError } from '../../../utils/errors';
 import { hashDiscordId } from '../../../services/encryption';
@@ -18,21 +18,21 @@ describe('getUser', () => {
     },
   } as Message;
   const hashedId = hashDiscordId(discordId);
-  const user = { discord_id: hashedId } as unknown as DiscordUser;
+  const user = { discord_id: hashedId } as unknown as DiscordUsers;
 
   it('should return a user if one exists', async () => {
-    jest.spyOn(DiscordUser, 'findOne').mockResolvedValueOnce(user);
+    jest.spyOn(DiscordUsers, 'findOne').mockResolvedValueOnce(user);
 
     const result = await pipe(getUser(message))();
 
     expect(result).toEqual({
       _tag: 'Right',
-      right: [user, message],
+      right: user,
     });
   });
 
   it('should return a UserNotFoundError if no user exists', async () => {
-    jest.spyOn(DiscordUser, 'findOne').mockResolvedValueOnce(null);
+    jest.spyOn(DiscordUsers, 'findOne').mockResolvedValueOnce(null);
 
     const result = await pipe(getUser(message))();
 
@@ -44,7 +44,7 @@ describe('getUser', () => {
 
   it('should return a DatabaseError if an error occurs', async () => {
     const error = new Error('test error');
-    jest.spyOn(DiscordUser, 'findOne').mockRejectedValueOnce(error);
+    jest.spyOn(DiscordUsers, 'findOne').mockRejectedValueOnce(error);
 
     const result = await pipe(getUser(message))();
 

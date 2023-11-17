@@ -1,34 +1,37 @@
 // factories.ts
 import factory from 'factory-girl';
 import { faker } from '@faker-js/faker';
-import { DiscordUser } from './DiscordUser';
-import { SpotifyToken } from './SpotifyToken';
+import { DiscordUsers } from './DiscordUsers';
+import { SpotifyTokens } from './SpotifyTokens';
 
-factory.define('DiscordUser', DiscordUser, {
-  discordId: factory.sequence('DiscordUser.discordId', (n) => `discordId${n}`),
+factory.define('DiscordUser', DiscordUsers, {
+  discordId: factory.sequence(
+    'DiscordUser.discordId',
+    (n: any) => `discordId${n}`
+  ),
   createdAt: faker.date.past(),
   updatedAt: faker.date.recent(),
 });
 
-factory.define('SpotifyToken', SpotifyToken, {
-  id: factory.sequence('SpotifyToken.id', (n) => n),
+factory.define('SpotifyToken', SpotifyTokens, {
+  id: factory.sequence('SpotifyToken.id', (n: any) => n),
   access_token: factory.sequence(
     'SpotifyToken.access_token',
-    (n) => `access_token${n}`
+    (n: any) => `access_token${n}`
   ),
-  scope: factory.sequence('SpotifyToken.scope', (n) => `scope${n}`),
+  scope: factory.sequence('SpotifyToken.scope', (n: any) => `scope${n}`),
   refresh_token: factory.sequence(
     'SpotifyToken.refresh_token',
-    (n) => `refresh_token${n}`
+    (n: any) => `refresh_token${n}`
   ),
-  token_expiry: factory.sequence('SpotifyToken.token_expiry', (n) => n),
+  token_expiry: factory.sequence('SpotifyToken.token_expiry', (n: any) => n),
   token_expiry_timestamp: factory.sequence(
     'SpotifyToken.token_expiry_timestamp',
-    (n) => faker.date.future(n)
+    (n: any) => faker.date.future(n)
   ),
   discord_user_id: factory.sequence(
     'SpotifyToken.discord_user_id',
-    (n) => `discord_user_id${n}`
+    (n: any) => `discord_user_id${n}`
   ),
   createdAt: faker.date.past(),
   updatedAt: faker.date.recent(),

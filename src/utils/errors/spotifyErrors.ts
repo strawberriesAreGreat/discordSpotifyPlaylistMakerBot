@@ -50,6 +50,6 @@ export class RefreshTokenFailure extends ApiError {
     super();
     this.name = 'RefreshTokenFailure';
     this.service = 'spotify';
-    this.fault = FaultType.USER;
+    this.fault = FaultType.SPOTIFY;
   }
 }

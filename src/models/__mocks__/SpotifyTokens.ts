@@ -5,7 +5,7 @@ import {
   Scope,
 } from '../../utils/types';
 
-export class SpotifyToken {
+export class SpotifyTokens {
   public id!: number;
   public access_token!: AccessToken;
   public scope!: Scope;
@@ -24,4 +24,4 @@ export class SpotifyToken {
   static update = jest.fn();
 }
 
-export default SpotifyToken;
+export default SpotifyTokens;

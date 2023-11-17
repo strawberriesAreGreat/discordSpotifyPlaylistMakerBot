@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
-import DiscordUser from './DiscordUsers';
+import DiscordUsers from './DiscordUsers';
 import {
   AccessToken,
   HashedString,
@@ -9,21 +9,21 @@ import {
   Scope,
 } from '../utils/types';
 
-export class SpotifyToken extends Model {
+export class SpotifyTokens extends Model {
   public id!: number;
   public accessToken!: AccessToken;
   public scope!: Scope;
   public refreshToken!: RefreshToken;
   public tokenExpiry!: RefreshTokenExpiry;
   public tokenExpiryTimestamp!: Date;
-  public discordUserId!: HashedString;
+  public discordUserId!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
   public static async getAccessToken(
     discordId: HashedString
   ): Promise<AccessToken | null> {
-    const token = await SpotifyToken.findOne({
+    const token = await SpotifyTokens.findOne({
       where: { discordUserId: discordId },
     });
     if (token) {
@@ -35,7 +35,7 @@ export class SpotifyToken extends Model {
   public static async getRefreshToken(
     discordId: HashedString
   ): Promise<RefreshToken | null> {
-    const token = await SpotifyToken.findOne({
+    const token = await SpotifyTokens.findOne({
       where: { discordUserId: discordId },
     });
     if (token) {
@@ -48,7 +48,7 @@ export class SpotifyToken extends Model {
     discordId: HashedString,
     refreshToken: RefreshToken
   ): Promise<void> {
-    await SpotifyToken.update(
+    await SpotifyTokens.update(
       { refreshToken: refreshToken },
       { where: { discordUserId: discordId } }
     );
@@ -58,14 +58,14 @@ export class SpotifyToken extends Model {
     discordId: HashedString,
     accessToken: AccessToken
   ): Promise<void> {
-    await SpotifyToken.update(
+    await SpotifyTokens.update(
       { accessToken: accessToken },
       { where: { discordUserId: discordId } }
     );
   }
 }
 
-SpotifyToken.init(
+SpotifyTokens.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -96,7 +96,7 @@ SpotifyToken.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: DiscordUser,
+        model: DiscordUsers,
         key: 'id',
       },
     },
@@ -109,12 +109,12 @@ SpotifyToken.init(
   },
   {
     sequelize,
-    tableName: 'SpotifyToken',
+    tableName: 'SpotifyTokens',
   }
 );
 
-DiscordUser.hasOne(SpotifyToken, {
+DiscordUsers.hasOne(SpotifyTokens, {
   foreignKey: 'discordUserID',
 });
 
-export default SpotifyToken;
+export default SpotifyTokens;

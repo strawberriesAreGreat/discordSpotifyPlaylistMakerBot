@@ -1,13 +1,13 @@
 // utils/types/DiscordUserData.ts
 
 import { Message } from 'discord.js';
-import { DiscordUser, SpotifyToken } from '../../../models';
-import { DiscordUsername, DiscordId } from '../enums';
+import { DiscordUsers, SpotifyTokens } from '../../../models';
+import { DiscordUsername, DiscordId, AccessToken } from '../enums';
 import { DiscordCommand } from '../../../middleware/discord/commandDictionary';
 
 export interface DiscordUserData {
-  user: DiscordUser;
-  token: SpotifyToken;
+  user: DiscordUsers;
+  token: AccessToken;
   message: Message;
   command: DiscordCommand;
   args: string[];

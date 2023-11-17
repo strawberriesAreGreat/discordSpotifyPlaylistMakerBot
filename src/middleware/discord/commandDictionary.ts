@@ -1,6 +1,4 @@
-import { Message } from 'discord.js';
 import * as commands from './commands';
-import DiscordUser from '../../models/DiscordUsers';
 
 export type DiscordCommand = {
   execute: (...args: any[]) => void;

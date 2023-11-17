@@ -2,11 +2,11 @@ import axios, { AxiosResponse } from 'axios';
 import Discord, { Message, TextBasedChannel } from 'discord.js';
 import dotenv from 'dotenv';
 import { getURIS, addSongs } from '../../spotify/services';
-import { DiscordUser } from '../../../models';
+import { DiscordUsers } from '../../../models';
 
 dotenv.config();
 
-export async function updatePlaylist(user: DiscordUser, message: Message) {
+export async function updatePlaylist(user: DiscordUsers, message: Message) {
   let limit = 100;
   let result: string[][] = [];
   let uris: string[] = [];

@@ -9,8 +9,8 @@ jest.mock('../commandDictionary', () => ({
     [noAuthCommand, { execute: jest.fn(), requiresUser: false }],
   ]),
 }));
-jest.mock('../../../models/DiscordUser');
-jest.mock('../../../models/SpotifyToken');
+jest.mock('../../../models/DiscordUsers');
+jest.mock('../../../models/SpotifyTokens');
 jest.mock('../../../services');
 jest.mock('../../db/db');
 jest.mock('../../db/getUser', () => {
@@ -30,13 +30,13 @@ import {
   registeredUserCommandMap,
   unregisteredUserCommandMap,
 } from '../commandDictionary';
-import { DiscordUser } from '../../../models';
+import { DiscordUsers } from '../../../models';
 import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { DiscordUserData } from '../../../utils/types/interfaces';
 
 describe('runCommand', () => {
-  const mockUser = { discordId: '123' } as DiscordUser;
+  const mockUser = { discordId: '123' } as DiscordUsers;
   const mockMessageWithAuthUser = { content: '!authCommand' } as Message;
 
   afterEach(() => {
@@ -59,9 +59,8 @@ describe('runCommand', () => {
 
   it('Unauthorized user trying to call authorized command should throw UnauthorizedDiscordCommand', async () => {
     const { getUser } = require('../../db/getUser');
-    getUser.mockImplementation(
-      (mockMessage: Message) => (mockMessage: Message) =>
-        new UserNotFoundError(mockMessage)
+    getUser.mockImplementation((mockMessage: Message) =>
+      TE.left(new UserNotFoundError(mockMessage))
     );
 
     const mockMessage = {
@@ -119,9 +118,7 @@ describe('runCommand', () => {
 
   it('Authorized user trying to call authorized command should run command', async () => {
     const { getUser } = require('../../db/getUser');
-    getUser.mockImplementation((mockMessage: Message) =>
-      TE.of([mockUser, mockMessage])
-    );
+    getUser.mockImplementation((mockMessage: Message) => TE.of(mockUser));
 
     const mockMessage = {
       author: { id: '918' },

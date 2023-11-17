@@ -6,15 +6,15 @@ import {
 import { pipe } from 'fp-ts/lib/function';
 import { getUser } from '../db/getUser';
 import * as TE from 'fp-ts/TaskEither';
-import DiscordUser from '../../models/DiscordUsers';
 import * as A from 'fp-ts/lib/Array';
 import {
   CommandNotFoundError,
   UnauthorizedDiscordCommand,
 } from '../../utils/errors';
 import * as O from 'fp-ts/Option';
-import SpotifyToken from '../../models/__mocks__/SpotifyToken';
 import { DiscordUserData } from '../../utils/types/interfaces';
+import { getUsersSpotifyToken } from '../spotify/getUsersSpotifyToken';
+import { DatabaseError } from 'sequelize';
 
 // get user auth token, run command if auth token exists
 export function discordCommand(message: Message): void {
@@ -23,6 +23,7 @@ export function discordCommand(message: Message): void {
     TE.right,
     TE.chain(getCommand),
     TE.chain(compileArgs),
+    TE.chain(combineDiscordUserDataAndSpotifyToken),
     TE.chain(runCommand),
     TE.fold(
       (err) => {
@@ -62,20 +63,27 @@ export function compileArgs({
       if (command.requiresUser) {
         return pipe(
           getUser(DiscordUserData.message),
-          TE.chain((user) => {
-            if (!user || !user[0]) {
-              let error = new UnauthorizedDiscordCommand(
-                DiscordUserData.message
-              );
-              DiscordUserData.message.channel.send(error.response);
-              return TE.left(error);
-            }
-            return TE.right({ ...DiscordUserData, user: user[0] });
-          })
+          TE.fold(
+            (error) =>
+              TE.left(new UnauthorizedDiscordCommand(DiscordUserData.message)),
+            (user) =>
+              TE.right({ ...DiscordUserData, user: user } as DiscordUserData)
+          )
         );
       }
       return TE.right(DiscordUserData);
     })
+  );
+}
+
+export function combineDiscordUserDataAndSpotifyToken(
+  discordUserData: DiscordUserData
+): TE.TaskEither<Error, DiscordUserData> {
+  return pipe(
+    discordUserData,
+    TE.right,
+    TE.chain(getUsersSpotifyToken),
+    TE.map((token) => ({ ...discordUserData, token: token }))
   );
 }
 

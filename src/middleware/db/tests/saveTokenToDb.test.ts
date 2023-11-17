@@ -27,12 +27,12 @@ describe('saveTokenDataToDb()', () => {
   };
   const mockSpotifyToken = {
     id: 1,
-    access_token: mockEncryptedAccessToken,
-    refresh_token: mockEncryptedRefreshToken,
+    accessToken: mockEncryptedAccessToken,
+    refreshToken: mockEncryptedRefreshToken,
     scope: mockScope,
-    token_expiry: mockExpiresIn,
-    token_expiry_timestamp: expect.any(Date),
-    discord_user_id: mockHashedDiscordId,
+    tokenExpiry: mockExpiresIn,
+    tokenExpiryTimestamp: expect.any(Date),
+    discordUserId: mockHashedDiscordId,
   };
 
   let originalEnv: NodeJS.ProcessEnv;
@@ -55,10 +55,10 @@ describe('saveTokenDataToDb()', () => {
     // Call saveTokenDataToDb() with mock data
     const result = await saveTokenDataToDb({
       state: mockEncryptedState,
-      access_token: mockEncryptedAccessToken,
-      refresh_token: mockEncryptedRefreshToken,
+      accessToken: mockEncryptedAccessToken,
+      refreshToken: mockEncryptedRefreshToken,
       scope: mockScope,
-      expires_in: mockExpiresIn,
+      tokenExpiry: mockExpiresIn,
     })();
 
     expect(DiscordUsers.findOne).toHaveBeenCalledWith({
@@ -72,12 +72,12 @@ describe('saveTokenDataToDb()', () => {
     });
 
     expect(SpotifyTokens.create).toHaveBeenCalledWith({
-      access_token: mockEncryptedAccessToken,
-      refresh_token: mockEncryptedRefreshToken,
+      accessToken: mockEncryptedAccessToken,
+      refreshToken: mockEncryptedRefreshToken,
       scope: mockScope,
-      token_expiry: mockExpiresIn,
-      discord_user_id: mockHashedDiscordId,
-      token_expiry_timestamp: expect.any(Date),
+      tokenExpiry: mockExpiresIn,
+      discordUserId: mockHashedDiscordId,
+      tokenExpiryTimestamp: expect.any(Date),
     });
 
     expect(decryptString).toHaveBeenCalledWith(
@@ -98,8 +98,8 @@ describe('saveTokenDataToDb()', () => {
 
     const result = await saveTokenDataToDb({
       state: mockEncryptedState,
-      access_token: mockEncryptedAccessToken,
-      refresh_token: mockEncryptedRefreshToken,
+      accessToken: mockEncryptedAccessToken,
+      refreshToken: mockEncryptedRefreshToken,
       scope: mockScope,
     })();
 

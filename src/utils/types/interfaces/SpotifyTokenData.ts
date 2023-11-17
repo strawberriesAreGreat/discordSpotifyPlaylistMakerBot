@@ -14,9 +14,9 @@ export interface SpotifyTokenData {
   scope?: Scope;
   code?: ResponseCode;
   state?: RequestState;
-  access_token?: AccessToken;
-  refresh_token?: RefreshToken;
-  expires_in?: RefreshTokenExpiresIn;
+  accessToken?: AccessToken;
+  refreshToken?: RefreshToken;
+  tokenExpiry?: RefreshTokenExpiresIn;
   TokenExpiry?: RefreshTokenExpiry;
-  token_type?: string;
+  tokenType?: string;
 }

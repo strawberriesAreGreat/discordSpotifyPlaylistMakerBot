@@ -38,18 +38,18 @@ export function getAccessToken(
     TE.chain((response) =>
       response.status === 200 && response.data.access_token !== null
         ? TE.right({
-            access_token: encryptString(
+            accessToken: encryptString(
               response.data.access_token as string,
               process.env.ENCRYPTION_SECRET as string
             ),
-            refresh_token: encryptString(
+            refreshToken: encryptString(
               response.data.refresh_token as string,
               process.env.ENCRYPTION_SECRET as string
             ),
             state: spotifyData.state,
             scope: response.data.scope,
-            expires_in: response.data.expires_in,
-            token_type: response.data.token_type,
+            tokenExpiry: response.data.expires_in,
+            tokenType: response.data.token_type,
           })
         : TE.left(new AccessTokenFailure())
     )

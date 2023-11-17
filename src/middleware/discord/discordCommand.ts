@@ -79,12 +79,16 @@ export function compileArgs({
 export function combineDiscordUserDataAndSpotifyToken(
   discordUserData: DiscordUserData
 ): TE.TaskEither<Error, DiscordUserData> {
-  return pipe(
-    discordUserData,
-    TE.right,
-    TE.chain(getUsersSpotifyToken),
-    TE.map((token) => ({ ...discordUserData, token: token }))
-  );
+  if (discordUserData.command.requiresUser) {
+    return pipe(
+      discordUserData,
+      TE.right,
+      TE.chain(getUsersSpotifyToken),
+      TE.map((token) => ({ ...discordUserData, token: token }))
+    );
+  } else {
+    return TE.right(discordUserData);
+  }
 }
 
 export function runCommand({
@@ -106,6 +110,7 @@ export function runCommand({
           ? TE.right(command.execute(user, message) as void)
           : TE.right(command.execute(message) as void);
       } catch (err) {
+        console.log('Frog on a log in the middle of the sea...');
         return TE.left(err as Error);
       }
     })

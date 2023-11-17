@@ -26,10 +26,10 @@ export function getUsersSpotifyToken(
           token.tokenExpiryTimestamp > new Date()
             ? TE.right(token.accessToken)
             : pipe(
-                refreshAccessToken(token),
-                TE.chain(() =>
+                refreshAccessToken(token.refreshToken),
+                TE.chain((spotifyTokenData) =>
                   saveTokenDataToDb(
-                    token,
+                    spotifyTokenData,
                     hashDiscordId(discordUserData.message.author.id)
                   )
                 ),

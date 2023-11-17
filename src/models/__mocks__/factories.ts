@@ -15,21 +15,21 @@ factory.define('DiscordUser', DiscordUsers, {
 
 factory.define('SpotifyToken', SpotifyTokens, {
   id: factory.sequence('SpotifyToken.id', (n: any) => n),
-  access_token: factory.sequence(
+  accessToken: factory.sequence(
     'SpotifyToken.access_token',
     (n: any) => `access_token${n}`
   ),
   scope: factory.sequence('SpotifyToken.scope', (n: any) => `scope${n}`),
-  refresh_token: factory.sequence(
+  refreshToken: factory.sequence(
     'SpotifyToken.refresh_token',
     (n: any) => `refresh_token${n}`
   ),
-  token_expiry: factory.sequence('SpotifyToken.token_expiry', (n: any) => n),
-  token_expiry_timestamp: factory.sequence(
+  tokenExpiry: factory.sequence('SpotifyToken.token_expiry', (n: any) => n),
+  tokenExpiryTimestamp: factory.sequence(
     'SpotifyToken.token_expiry_timestamp',
     (n: any) => faker.date.future(n)
   ),
-  discord_user_id: factory.sequence(
+  discordUserId: factory.sequence(
     'SpotifyToken.discord_user_id',
     (n: any) => `discord_user_id${n}`
   ),

@@ -4,7 +4,7 @@ import { Message } from 'discord.js';
 
 export class DatabaseError extends ApiError {
   databaseError?: Error;
-  constructor(message: Message, error?: Error) {
+  constructor(message?: Message, error?: Error) {
     super(message);
     this.name = 'DatabaseError';
     this.service = 'db';
@@ -28,6 +28,15 @@ export class TokenNotFoundError extends DatabaseError {
   constructor(message: Message, error?: Error) {
     super(message, error);
     this.name = 'TokenNotFoundError';
+    this.service = 'db';
+    this.fault = FaultType.INTERNAL;
+  }
+}
+
+export class TokenCreationError extends DatabaseError {
+  constructor(error: Error) {
+    super(undefined, error);
+    this.name = 'TokenCreationError';
     this.service = 'db';
     this.fault = FaultType.INTERNAL;
   }

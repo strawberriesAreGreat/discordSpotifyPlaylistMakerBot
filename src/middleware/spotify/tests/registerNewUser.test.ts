@@ -1,6 +1,6 @@
 jest.useFakeTimers();
 import { InvalidUrlError } from '../../../utils/errors';
-import { validateUrl } from '../spotifyAuthServer';
+import { validateUrl } from '../registerNewUser';
 import { IncomingMessage } from 'http';
 
 jest.mock('../../../models/DiscordUsers');

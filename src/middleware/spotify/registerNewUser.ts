@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import { SpotifyCode, SpotifyState, SpotifyTokenData } from '../../utils/types';
 import { saveTokenDataToDb } from '../db/saveTokenToDb';
 import { getAccessToken } from './services/authorization/getAccessToken';
+import { getUserProfile } from './services/authorization/getUserProfile';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ const server = http.createServer(
       TE.chain(parseUrl),
       TE.chain(getAuthCode),
       TE.chain(getAccessToken),
+      TE.chain(getUserProfile),
       TE.chain(saveTokenDataToDb),
       TE.fold(handleError, () => TE.of(undefined))
     )();

@@ -10,7 +10,7 @@ import { getUser } from '../db/getUser';
 import { getToken } from '../db/getToken';
 import { hashDiscordId } from '../../services';
 
-export function getUsersSpotifyToken(
+export function getSpotifyToken(
   discordUserData: DiscordUserData
 ): TE.TaskEither<Error, AccessToken> {
   return pipe(

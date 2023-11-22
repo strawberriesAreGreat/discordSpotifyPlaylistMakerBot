@@ -1,6 +1,6 @@
 import DiscordClient from './middleware/discord/discordClient';
 import { eventListeners } from './middleware/discord/listener';
-import server from './middleware/spotify/spotifyAuthServer';
+import server from './middleware/spotify/registerNewUser';
 
 console.log('Starting server...');
 server.listen(process.env.APP_PORT, () => {

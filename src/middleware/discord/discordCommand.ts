@@ -13,8 +13,6 @@ import {
 } from '../../utils/errors';
 import * as O from 'fp-ts/Option';
 import { DiscordUserData } from '../../utils/types/interfaces';
-import { getUsersSpotifyToken } from '../spotify/getUsersSpotifyToken';
-import { DatabaseError } from 'sequelize';
 
 // get user auth token, run command if auth token exists
 export function discordCommand(message: Message): void {

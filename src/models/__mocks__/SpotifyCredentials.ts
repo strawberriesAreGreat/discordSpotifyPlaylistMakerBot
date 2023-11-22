@@ -3,9 +3,10 @@ import {
   RefreshToken,
   RefreshTokenExpiry,
   Scope,
+  UserUri,
 } from '../../utils/types';
 
-export class SpotifyTokens {
+export class SpotifyCredentials {
   public id!: number;
   public accessToken!: AccessToken;
   public scope!: Scope;
@@ -13,6 +14,7 @@ export class SpotifyTokens {
   public tokenExpiry!: RefreshTokenExpiry;
   public tokenExpiryTimestamp!: Date;
   public userId!: string;
+  public userUri!: UserUri;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   discordId: any;
@@ -25,4 +27,4 @@ export class SpotifyTokens {
   static upsert = jest.fn();
 }
 
-export default SpotifyTokens;
+export default SpotifyCredentials;

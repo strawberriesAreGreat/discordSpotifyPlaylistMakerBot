@@ -3,14 +3,14 @@ import { FaultType } from '../types';
 import { Message } from 'discord.js';
 
 export class SpotifyApiError extends ApiError {
-  constructor(command: Message) {
+  constructor(command?: Message) {
     super(command);
     this.name = 'SpotifyApiError';
     this.service = 'spotify';
     this.fault = FaultType.INTERNAL;
   }
 }
-export class InvalidUrlError extends ApiError {
+export class InvalidUrlError extends SpotifyApiError {
   constructor() {
     super();
     this.name = 'InvalidUrlError';
@@ -19,7 +19,7 @@ export class InvalidUrlError extends ApiError {
   }
 }
 
-export class UrlParametersNotFoundError extends ApiError {
+export class UrlParametersNotFoundError extends SpotifyApiError {
   constructor() {
     super();
     this.name = 'UrlParametersNotFoundError';
@@ -27,7 +27,7 @@ export class UrlParametersNotFoundError extends ApiError {
     this.fault = FaultType.USER;
   }
 }
-export class InvalidAuthCodeError extends ApiError {
+export class InvalidAuthCodeError extends SpotifyApiError {
   constructor() {
     super();
     this.name = 'InvalidAuthCodeError';
@@ -36,20 +36,29 @@ export class InvalidAuthCodeError extends ApiError {
   }
 }
 
-export class AccessTokenFailure extends ApiError {
+export class AccessTokenFailure extends SpotifyApiError {
   constructor() {
     super();
     this.name = 'AccessTokenFailure';
     this.service = 'spotify';
-    this.fault = FaultType.USER;
+    this.fault = FaultType.INTERNAL;
   }
 }
 
-export class RefreshTokenFailure extends ApiError {
+export class UserProfileError extends SpotifyApiError {
+  constructor() {
+    super();
+    this.name = 'UserProfileError';
+    this.service = 'spotify';
+    this.fault = FaultType.INTERNAL;
+  }
+}
+
+export class RefreshTokenFailure extends SpotifyApiError {
   constructor() {
     super();
     this.name = 'RefreshTokenFailure';
     this.service = 'spotify';
-    this.fault = FaultType.SPOTIFY;
+    this.fault = FaultType.INTERNAL;
   }
 }

@@ -10,7 +10,7 @@ jest.mock('../commandDictionary', () => ({
   ]),
 }));
 jest.mock('../../../models/DiscordUsers');
-jest.mock('../../../models/SpotifyTokens');
+jest.mock('../../../models/SpotifyCredentials');
 jest.mock('../../../services');
 jest.mock('../../db/db');
 jest.mock('../../db/getUser', () => {

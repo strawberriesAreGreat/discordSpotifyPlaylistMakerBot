@@ -7,14 +7,14 @@ import {
 import { decryptString, hashDiscordId } from '../../services';
 import DiscordUsers from '../../models/DiscordUsers';
 import { pipe } from 'fp-ts/function';
-import SpotifyTokens from '../../models/SpotifyTokens';
+import SpotifyCredentials from '../../models/SpotifyCredentials';
 import { TokenCreationError, UserNotFoundError } from '../../utils/errors';
 import { DatabaseError } from '../../utils/errors';
 
 export function saveTokenDataToDb(
   spotifyData: SpotifyTokenData,
   discordUserId?: DiscordId
-): TE.TaskEither<Error, SpotifyTokens> {
+): TE.TaskEither<Error, SpotifyCredentials> {
   let secret: string = process.env.ENCRYPTION_SECRET as string;
   const scope: string = spotifyData.scope;
   const accessToken = spotifyData.accessToken;
@@ -22,6 +22,7 @@ export function saveTokenDataToDb(
   const tokenExpiry = spotifyData.tokenExpiry;
   const tokenExpiryTimestamp = spotifyData.tokenExpiryTime;
   const tokenType = spotifyData.tokenType;
+  const userUri = spotifyData.userUri;
 
   if (!discordUserId && spotifyData.state)
     discordUserId = hashDiscordId(
@@ -46,7 +47,7 @@ export function saveTokenDataToDb(
     TE.chain((user) =>
       TE.tryCatch(
         () =>
-          SpotifyTokens.upsert({
+          SpotifyCredentials.upsert({
             userId: user.id, // Use the ID from the DiscordUser
             accessToken: accessToken,
             refreshToken: refreshToken,
@@ -54,6 +55,7 @@ export function saveTokenDataToDb(
             tokenExpiry: tokenExpiry,
             tokenExpiryTimestamp: tokenExpiryTimestamp,
             tokenType: tokenType,
+            userUri: userUri,
           }),
         (err) => new TokenCreationError(err as Error) as Error
       )

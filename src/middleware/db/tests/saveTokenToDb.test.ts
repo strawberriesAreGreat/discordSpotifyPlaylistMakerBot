@@ -1,10 +1,10 @@
 jest.mock('../../../models/DiscordUsers');
-jest.mock('../../../models/SpotifyTokens');
+jest.mock('../../../models/SpotifyCredentials');
 jest.mock('../../../services');
 jest.mock('../db');
 
 import { DiscordUsers } from '../../../models/DiscordUsers';
-import SpotifyTokens from '../../../models/SpotifyTokens';
+import { SpotifyCredentials } from '../../../models/SpotifyCredentials';
 import { decryptString, hashDiscordId } from '../../../services';
 import {
   EncryptedString,
@@ -74,7 +74,7 @@ describe('saveTokenDataToDb()', () => {
     (hashDiscordId as jest.Mock).mockReturnValue(hashedDiscordId);
     (decryptString as jest.Mock).mockReturnValue(discordUserID);
     (DiscordUsers.upsert as jest.Mock).mockResolvedValue([mockUser, true]);
-    (SpotifyTokens.upsert as jest.Mock).mockResolvedValue([
+    (SpotifyCredentials.upsert as jest.Mock).mockResolvedValue([
       mockSpotifyToken,
       true,
     ]);
@@ -87,7 +87,7 @@ describe('saveTokenDataToDb()', () => {
       discordId: hashedDiscordId,
     });
 
-    expect(SpotifyTokens.upsert).toHaveBeenCalledWith({
+    expect(SpotifyCredentials.upsert).toHaveBeenCalledWith({
       userId: mockUser.id,
       accessToken: encryptedAccessToken,
       refreshToken: encryptedRefreshToken,
@@ -102,7 +102,7 @@ describe('saveTokenDataToDb()', () => {
 
   it('should create a new DiscordUser and SpotifyToken record with DiscordId', async () => {
     (DiscordUsers.upsert as jest.Mock).mockResolvedValue([mockUser, true]);
-    (SpotifyTokens.upsert as jest.Mock).mockResolvedValue([
+    (SpotifyCredentials.upsert as jest.Mock).mockResolvedValue([
       mockSpotifyToken,
       true,
     ]);
@@ -119,7 +119,7 @@ describe('saveTokenDataToDb()', () => {
       discordId: hashedDiscordId,
     });
 
-    expect(SpotifyTokens.upsert).toHaveBeenCalledWith({
+    expect(SpotifyCredentials.upsert).toHaveBeenCalledWith({
       userId: mockUser.id,
       accessToken: encryptedAccessToken,
       refreshToken: encryptedRefreshToken,
@@ -137,6 +137,6 @@ describe('saveTokenDataToDb()', () => {
     expect(hashDiscordId).not.toHaveBeenCalled();
     expect(decryptString).not.toHaveBeenCalled();
     expect(DiscordUsers.upsert).not.toHaveBeenCalled();
-    expect(SpotifyTokens.upsert).not.toHaveBeenCalled();
+    expect(SpotifyCredentials.upsert).not.toHaveBeenCalled();
   });
 });

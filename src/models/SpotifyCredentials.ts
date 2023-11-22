@@ -7,9 +7,10 @@ import {
   RefreshToken,
   RefreshTokenExpiry,
   Scope,
+  UserUri,
 } from '../utils/types';
 
-export class SpotifyTokens extends Model {
+export class SpotifyCredentials extends Model {
   public id!: number;
   public accessToken!: AccessToken;
   public scope!: Scope;
@@ -17,11 +18,12 @@ export class SpotifyTokens extends Model {
   public tokenExpiry!: RefreshTokenExpiry;
   public tokenExpiryTimestamp!: Date;
   public userId!: number;
+  public userUri!: UserUri;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
 
-SpotifyTokens.init(
+SpotifyCredentials.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -56,6 +58,10 @@ SpotifyTokens.init(
         key: 'id',
       },
     },
+    userUri: {
+      type: DataTypes.STRING(1024),
+      allowNull: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
     },
@@ -65,12 +71,12 @@ SpotifyTokens.init(
   },
   {
     sequelize,
-    tableName: 'SpotifyTokens',
+    tableName: 'SpotifyCredentials',
   }
 );
 
-DiscordUsers.hasOne(SpotifyTokens, {
+DiscordUsers.hasOne(SpotifyCredentials, {
   foreignKey: 'userId',
 });
 
-export default SpotifyTokens;
+export default SpotifyCredentials;

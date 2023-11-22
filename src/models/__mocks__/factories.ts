@@ -2,7 +2,7 @@
 import factory from 'factory-girl';
 import { faker } from '@faker-js/faker';
 import { DiscordUsers } from './DiscordUsers';
-import { SpotifyTokens } from './SpotifyTokens';
+import { SpotifyCredentials } from './SpotifyCredentials';
 
 factory.define('DiscordUser', DiscordUsers, {
   discordId: factory.sequence(
@@ -13,7 +13,7 @@ factory.define('DiscordUser', DiscordUsers, {
   updatedAt: faker.date.recent(),
 });
 
-factory.define('SpotifyToken', SpotifyTokens, {
+factory.define('SpotifyToken', SpotifyCredentials, {
   id: factory.sequence('SpotifyToken.id', (n: any) => n),
   accessToken: factory.sequence(
     'SpotifyToken.access_token',

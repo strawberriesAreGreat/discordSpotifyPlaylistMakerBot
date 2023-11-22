@@ -1,17 +1,16 @@
 import * as TE from 'fp-ts/TaskEither';
 import DiscordUsers from '../../models/DiscordUsers';
 import { pipe } from 'fp-ts/function';
-import { Message } from 'discord.js';
 import { DatabaseError, TokenNotFoundError } from '../../utils/errors';
-import SpotifyTokens from '../../models/SpotifyTokens';
+import SpotifyCredentials from '../../models/SpotifyCredentials';
 
 export function getToken(
   discordUser: DiscordUsers
-): TE.TaskEither<DatabaseError, SpotifyTokens> {
+): TE.TaskEither<DatabaseError, SpotifyCredentials> {
   return pipe(
     TE.tryCatch(
       () =>
-        SpotifyTokens.findOne({
+        SpotifyCredentials.findOne({
           where: { discordUserId: discordUser.id },
         }),
       (error) => new DatabaseError(error as Error)

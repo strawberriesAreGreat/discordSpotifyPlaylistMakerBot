@@ -8,6 +8,7 @@ import {
   SpotifyCode,
   RefreshTokenExpiry,
   SpotifyState,
+  UserUri,
 } from '../enums';
 
 export interface SpotifyTokenData {
@@ -19,4 +20,5 @@ export interface SpotifyTokenData {
   tokenExpiry: RefreshTokenExpiresIn;
   tokenExpiryTime: RefreshTokenExpiry;
   tokenType: string;
+  userUri?: UserUri;
 }

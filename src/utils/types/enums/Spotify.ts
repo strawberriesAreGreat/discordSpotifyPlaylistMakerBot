@@ -7,6 +7,7 @@ type RefreshTokenExpiresIn = number;
 type RefreshTokenExpiry = Date;
 type Scope = string;
 type SpotifyCode = string;
+type UserUri = string;
 
 export type {
   SpotifyState,
@@ -16,4 +17,5 @@ export type {
   Scope,
   RefreshTokenExpiry,
   SpotifyCode,
+  UserUri,
 };

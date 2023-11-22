@@ -4,7 +4,7 @@ import { validateUrl } from '../registerNewUser';
 import { IncomingMessage } from 'http';
 
 jest.mock('../../../models/DiscordUsers');
-jest.mock('../../../models/SpotifyTokens');
+jest.mock('../../../models/SpotifyCredentials');
 jest.mock('../../../services');
 
 describe('parseUrl', () => {

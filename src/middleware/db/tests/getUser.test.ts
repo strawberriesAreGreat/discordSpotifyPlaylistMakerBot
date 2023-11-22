@@ -1,5 +1,5 @@
 jest.mock('../../../models/DiscordUsers');
-jest.mock('../../../models/SpotifyTokens');
+jest.mock('../../../models/SpotifyCredentials');
 jest.mock('../../../services');
 jest.mock('../db');
 

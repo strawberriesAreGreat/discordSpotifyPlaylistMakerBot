@@ -12,7 +12,7 @@ export class SpotifyTokens {
   public refreshToken!: RefreshToken;
   public tokenExpiry!: RefreshTokenExpiry;
   public tokenExpiryTimestamp!: Date;
-  public discordUserId!: string;
+  public userId!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   discordId: any;
@@ -22,6 +22,7 @@ export class SpotifyTokens {
   static create = jest.fn();
   static findAll = jest.fn();
   static update = jest.fn();
+  static upsert = jest.fn();
 }
 
 export default SpotifyTokens;

@@ -1,5 +1,9 @@
 import * as TE from 'fp-ts/TaskEither';
-import { SpotifyTokenData } from '../../../../utils/types';
+import {
+  SpotifyCode,
+  SpotifyState,
+  SpotifyTokenData,
+} from '../../../../utils/types';
 import { getRedirect_uri } from '../../../../utils/utils';
 import { pipe } from 'fp-ts/function';
 import axios from 'axios';
@@ -8,14 +12,15 @@ import { encryptString } from '../../../../services';
 
 const REDIRECT_URI = getRedirect_uri();
 
-export function getAccessToken(
-  spotifyData: SpotifyTokenData
-): TE.TaskEither<Error, SpotifyTokenData> {
+export function getAccessToken([spotifyCode, spotifyState]: [
+  SpotifyCode,
+  SpotifyState,
+]): TE.TaskEither<Error, SpotifyTokenData> {
   const authOptions = {
     url: 'https://accounts.spotify.com/api/token',
     method: 'POST',
     params: {
-      code: spotifyData.code,
+      code: spotifyCode,
       redirect_uri: REDIRECT_URI,
       grant_type: 'authorization_code',
     },
@@ -46,9 +51,12 @@ export function getAccessToken(
               response.data.refresh_token as string,
               process.env.ENCRYPTION_SECRET as string
             ),
-            state: spotifyData.state,
+            state: spotifyState,
             scope: response.data.scope,
             tokenExpiry: response.data.expires_in,
+            tokenExpiryTime: new Date(
+              Date.now() + response.data.expires_in * 1000
+            ),
             tokenType: response.data.token_type,
           })
         : TE.left(new AccessTokenFailure())

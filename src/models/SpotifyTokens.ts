@@ -16,53 +16,9 @@ export class SpotifyTokens extends Model {
   public refreshToken!: RefreshToken;
   public tokenExpiry!: RefreshTokenExpiry;
   public tokenExpiryTimestamp!: Date;
-  public discordUserId!: number;
+  public userId!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
-
-  public static async getAccessToken(
-    discordId: HashedString
-  ): Promise<AccessToken | null> {
-    const token = await SpotifyTokens.findOne({
-      where: { discordUserId: discordId },
-    });
-    if (token) {
-      return token.accessToken;
-    }
-    return null;
-  }
-
-  public static async getRefreshToken(
-    discordId: HashedString
-  ): Promise<RefreshToken | null> {
-    const token = await SpotifyTokens.findOne({
-      where: { discordUserId: discordId },
-    });
-    if (token) {
-      return token.refreshToken;
-    }
-    return null;
-  }
-
-  public static async updateRefreshToken(
-    discordId: HashedString,
-    refreshToken: RefreshToken
-  ): Promise<void> {
-    await SpotifyTokens.update(
-      { refreshToken: refreshToken },
-      { where: { discordUserId: discordId } }
-    );
-  }
-
-  public static async updateAccessToken(
-    discordId: HashedString,
-    accessToken: AccessToken
-  ): Promise<void> {
-    await SpotifyTokens.update(
-      { accessToken: accessToken },
-      { where: { discordUserId: discordId } }
-    );
-  }
 }
 
 SpotifyTokens.init(
@@ -92,7 +48,7 @@ SpotifyTokens.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    discordUserId: {
+    userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -114,7 +70,7 @@ SpotifyTokens.init(
 );
 
 DiscordUsers.hasOne(SpotifyTokens, {
-  foreignKey: 'discordUserID',
+  foreignKey: 'userId',
 });
 
 export default SpotifyTokens;

@@ -36,7 +36,7 @@ import * as TE from 'fp-ts/lib/TaskEither';
 import { DiscordUserData } from '../../../utils/types/interfaces';
 
 describe('runCommand', () => {
-  const mockUser = { discordId: '123' } as DiscordUsers;
+  const mockUser = { id: 123 } as DiscordUsers;
   const mockMessageWithAuthUser = { content: '!authCommand' } as Message;
 
   afterEach(() => {
@@ -60,7 +60,7 @@ describe('runCommand', () => {
   it('Unauthorized user trying to call authorized command should throw UnauthorizedDiscordCommand', async () => {
     const { getUser } = require('../../db/getUser');
     getUser.mockImplementation((mockMessage: Message) =>
-      TE.left(new UserNotFoundError(mockMessage))
+      TE.left(new UserNotFoundError())
     );
 
     const mockMessage = {
@@ -87,7 +87,7 @@ describe('runCommand', () => {
   it('Unauthorized user trying to call unauthorized command should run command', async () => {
     const { getUser } = require('../../db/getUser');
     getUser.mockImplementation(
-      (mockMessage: Message) => new UserNotFoundError(mockMessage)
+      (mockMessage: Message) => new UserNotFoundError()
     );
 
     const mockMessage = {

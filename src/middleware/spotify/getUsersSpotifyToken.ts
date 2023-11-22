@@ -17,11 +17,11 @@ export function getUsersSpotifyToken(
     discordUserData,
     TE.right,
     TE.chain((discordUserData) => getUser(discordUserData.message)),
-    TE.chain((discordUser) => getToken(discordUser, discordUserData.message)),
+    TE.chain((discordUser) => getToken(discordUser)),
     TE.chain((spotifyToken) =>
       pipe(
         spotifyToken,
-        TE.fromNullable(new TokenNotFoundError(discordUserData.message)),
+        TE.fromNullable(new TokenNotFoundError()),
         TE.chain((token) =>
           token.tokenExpiryTimestamp > new Date()
             ? TE.right(token.accessToken)

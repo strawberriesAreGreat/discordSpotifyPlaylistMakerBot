@@ -38,6 +38,7 @@ export function refreshAccessToken(
     TE.chain((response) =>
       response.status === 200 && response.data.access_token !== null
         ? TE.right({
+            scope: response.data.scope,
             accessToken: encryptString(
               response.data.access_token as string,
               process.env.ENCRYPTION_SECRET as string
@@ -46,8 +47,10 @@ export function refreshAccessToken(
               response.data.refresh_token as string,
               process.env.ENCRYPTION_SECRET as string
             ),
-            scope: response.data.scope,
-            expires_in: response.data.expires_in,
+            tokenExpiry: response.data.expires_in,
+            tokenExpiryTime: new Date(
+              Date.now() + response.data.expires_in * 1000
+            ),
             tokenType: response.data.token_type,
           })
         : TE.left(new RefreshTokenFailure())

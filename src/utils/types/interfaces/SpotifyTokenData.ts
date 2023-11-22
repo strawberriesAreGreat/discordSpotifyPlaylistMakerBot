@@ -5,18 +5,18 @@ import {
   AccessToken,
   RefreshTokenExpiresIn,
   RefreshToken,
-  ResponseCode,
+  SpotifyCode,
   RefreshTokenExpiry,
-  RequestState,
+  SpotifyState,
 } from '../enums';
 
 export interface SpotifyTokenData {
-  scope?: Scope;
-  code?: ResponseCode;
-  state?: RequestState;
-  accessToken?: AccessToken;
-  refreshToken?: RefreshToken;
-  tokenExpiry?: RefreshTokenExpiresIn;
-  TokenExpiry?: RefreshTokenExpiry;
-  tokenType?: string;
+  scope: Scope;
+  code?: SpotifyCode;
+  state?: SpotifyState;
+  accessToken: AccessToken;
+  refreshToken: RefreshToken;
+  tokenExpiry: RefreshTokenExpiresIn;
+  tokenExpiryTime: RefreshTokenExpiry;
+  tokenType: string;
 }

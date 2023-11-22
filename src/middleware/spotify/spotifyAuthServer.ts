@@ -7,7 +7,7 @@ import {
   InvalidAuthCodeError,
 } from '../../utils/errors';
 import dotenv from 'dotenv';
-import { EncryptedString, SpotifyTokenData } from '../../utils/types';
+import { SpotifyCode, SpotifyState, SpotifyTokenData } from '../../utils/types';
 import { saveTokenDataToDb } from '../db/saveTokenToDb';
 import { getAccessToken } from './services/authorization/getAccessToken';
 
@@ -57,16 +57,12 @@ export function parseUrl(
 
 export function getAuthCode(
   urlParams: URLSearchParams
-): TE.TaskEither<Error, SpotifyTokenData> {
-  const authCode = urlParams.get('code') as string;
-  const state = urlParams.get('state') as EncryptedString;
-  const authCodeAndState: SpotifyTokenData = {
-    code: authCode,
-    state: state,
-  };
+): TE.TaskEither<Error, [SpotifyCode, SpotifyState]> {
+  const authCode = urlParams.get('code') as SpotifyCode;
+  const state = urlParams.get('state') as SpotifyState;
 
   return authCode != null && state != null
-    ? TE.right(authCodeAndState)
+    ? TE.right([authCode, state])
     : TE.left(new InvalidAuthCodeError());
 }
 

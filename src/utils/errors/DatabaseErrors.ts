@@ -4,8 +4,8 @@ import { Message } from 'discord.js';
 
 export class DatabaseError extends ApiError {
   databaseError?: Error;
-  constructor(message?: Message, error?: Error) {
-    super(message);
+  constructor(error?: Error) {
+    super();
     this.name = 'DatabaseError';
     this.service = 'db';
     this.fault = FaultType.INTERNAL;
@@ -16,8 +16,8 @@ export class DatabaseError extends ApiError {
 // TODO: This should be faulttype.INTERNAL, unauthorized user should never be able to reach this point.
 // Review and refactor as needed.
 export class UserNotFoundError extends DatabaseError {
-  constructor(message: Message, error?: Error) {
-    super(message, error);
+  constructor(error?: Error) {
+    super(error ? error : error);
     this.name = 'UserNotFoundError';
     this.service = 'db';
     this.fault = FaultType.USER;
@@ -25,8 +25,8 @@ export class UserNotFoundError extends DatabaseError {
 }
 
 export class TokenNotFoundError extends DatabaseError {
-  constructor(message: Message, error?: Error) {
-    super(message, error);
+  constructor(error?: Error) {
+    super(error ? error : error);
     this.name = 'TokenNotFoundError';
     this.service = 'db';
     this.fault = FaultType.INTERNAL;
@@ -35,7 +35,7 @@ export class TokenNotFoundError extends DatabaseError {
 
 export class TokenCreationError extends DatabaseError {
   constructor(error: Error) {
-    super(undefined, error);
+    super(error ? error : error);
     this.name = 'TokenCreationError';
     this.service = 'db';
     this.fault = FaultType.INTERNAL;

@@ -1,15 +1,15 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
-import { HashedString } from '../utils/types';
+import { DiscordId, HashedString } from '../utils/types';
 
 export class DiscordUsers extends Model {
   public id!: number;
-  public discordId!: HashedString;
+  public discordId!: DiscordId;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 
   public static async findOrCreateByDiscordId(
-    discordId: HashedString
+    discordId: DiscordId
   ): Promise<DiscordUsers> {
     const [user, created] = await DiscordUsers.findOrCreate({
       where: {

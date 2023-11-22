@@ -8,69 +8,56 @@ import { decryptString, hashDiscordId } from '../../services';
 import DiscordUsers from '../../models/DiscordUsers';
 import { pipe } from 'fp-ts/function';
 import SpotifyTokens from '../../models/SpotifyTokens';
-import { TokenCreationError, DatabaseError } from '../../utils/errors';
+import { TokenCreationError, UserNotFoundError } from '../../utils/errors';
+import { DatabaseError } from '../../utils/errors';
 
 export function saveTokenDataToDb(
   spotifyData: SpotifyTokenData,
-  discordId?: DiscordId
-): TE.TaskEither<Error, void> {
+  discordUserId?: DiscordId
+): TE.TaskEither<Error, SpotifyTokens> {
   let secret: string = process.env.ENCRYPTION_SECRET as string;
-  const token = spotifyData.accessToken;
+  const scope: string = spotifyData.scope;
+  const accessToken = spotifyData.accessToken;
   const refreshToken = spotifyData.refreshToken;
-  const scope: string = spotifyData.scope as string;
-  const tokenExpiry = spotifyData.tokenExpiry as number;
-  const tokenExpiryTimestamp = new Date(Date.now() + tokenExpiry * 1000);
-  let discordUserID = discordId
-    ? discordId
-    : hashDiscordId(
-        decryptString(spotifyData.state as EncryptedString, secret)
-      );
+  const tokenExpiry = spotifyData.tokenExpiry;
+  const tokenExpiryTimestamp = spotifyData.tokenExpiryTime;
+  const tokenType = spotifyData.tokenType;
 
-  if (discordUserID === undefined) {
-    throw new Error('Failed to get discordUserID');
+  if (!discordUserId && spotifyData.state)
+    discordUserId = hashDiscordId(
+      decryptString(spotifyData.state, secret)
+    ) as DiscordId;
+
+  if (!discordUserId) {
+    return TE.left(
+      new Error('No Discord User ID or spotifyState response provided')
+    );
   }
 
   return pipe(
     TE.tryCatch(
       () =>
-        DiscordUsers.findOne({
-          where: {
-            discordId: discordUserID,
-          },
+        DiscordUsers.upsert({
+          discordId: discordUserId,
         }),
-      (err) => new Error(`Failed to find DiscordUser: ${err}`)
+      (err) => new DatabaseError(err as Error)
     ),
-    TE.chain((user) =>
-      user
-        ? TE.right(user)
-        : TE.tryCatch(
-            () =>
-              DiscordUsers.create({
-                discordId: discordUserID,
-              }),
-            (err) => new Error(`Failed to create DiscordUser: ${err}`)
-          )
-    ),
+    TE.chain(([user, _]) => TE.right(user)),
     TE.chain((user) =>
       TE.tryCatch(
-        async () => {
+        () =>
           SpotifyTokens.upsert({
-            discordUserId: user,
-            accessToken: token,
+            userId: user.id, // Use the ID from the DiscordUser
+            accessToken: accessToken,
             refreshToken: refreshToken,
             scope: scope,
             tokenExpiry: tokenExpiry,
             tokenExpiryTimestamp: tokenExpiryTimestamp,
-          })
-            .then(([SpotifyToken, _]) => {
-              TE.right(SpotifyToken);
-            })
-            .catch((error) => {
-              TE.left(new TokenCreationError(error));
-            });
-        },
-        (err) => new Error(`Failed to create SpotifyToken: ${err}`)
+            tokenType: tokenType,
+          }),
+        (err) => new TokenCreationError(err as Error) as Error
       )
-    )
+    ),
+    TE.chain(([spotifyToken, _]) => TE.right(spotifyToken))
   );
 }

@@ -14,10 +14,10 @@ export function getUser(
         DiscordUsers.findOne({
           where: { discordId: hashDiscordId(message.author.id) },
         }),
-      (err: unknown) => new DatabaseError(message)
+      (err: unknown) => new DatabaseError(err as Error)
     ),
     TE.chain((user) =>
-      user ? TE.right(user) : TE.left(new UserNotFoundError(message))
+      user ? TE.right(user) : TE.left(new UserNotFoundError())
     )
   );
 }

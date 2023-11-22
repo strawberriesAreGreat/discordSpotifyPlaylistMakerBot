@@ -1,19 +1,19 @@
 import { EncryptedString } from './EncryptedString';
 
-type RequestState = EncryptedString;
+type SpotifyState = EncryptedString;
 type AccessToken = EncryptedString;
 type RefreshToken = EncryptedString;
 type RefreshTokenExpiresIn = number;
 type RefreshTokenExpiry = Date;
 type Scope = string;
-type ResponseCode = string;
+type SpotifyCode = string;
 
 export type {
-  RequestState,
+  SpotifyState,
   RefreshToken,
   AccessToken,
   RefreshTokenExpiresIn,
   Scope,
   RefreshTokenExpiry,
-  ResponseCode,
+  SpotifyCode,
 };

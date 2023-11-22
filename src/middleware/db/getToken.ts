@@ -6,19 +6,18 @@ import { DatabaseError, TokenNotFoundError } from '../../utils/errors';
 import SpotifyTokens from '../../models/SpotifyTokens';
 
 export function getToken(
-  discordUser: DiscordUsers,
-  message: Message
-): TE.TaskEither<DatabaseError | TokenNotFoundError, SpotifyTokens> {
+  discordUser: DiscordUsers
+): TE.TaskEither<DatabaseError, SpotifyTokens> {
   return pipe(
     TE.tryCatch(
       () =>
         SpotifyTokens.findOne({
           where: { discordUserId: discordUser.id },
         }),
-      (error: unknown) => new DatabaseError(message, error as Error)
+      (error) => new DatabaseError(error as Error)
     ),
     TE.chain((token) =>
-      token ? TE.right(token) : TE.left(new TokenNotFoundError(message))
+      token ? TE.right(token) : TE.left(new TokenNotFoundError())
     )
   );
 }

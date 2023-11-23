@@ -5,13 +5,15 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node src/main.ts",
+    "bun:prod": "bun src/main.ts",
+    "bun:dev": "bun --watch run src/main.ts",
     "dev": "nodemon -L --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts",
     "test": "jest",
     "sequelize": "sequelize db:migrate",
-    "docker:prod": "docker-compose up --build app-prod",
-    "docker:dev": "docker-compose up --build app-dev",
+    "docker:compose:prod": "docker-compose up --build app-prod",
+    "docker:compose:dev": "docker-compose up --build app-dev",
     "todo": "leasot -x --reporter markdown 'src/**/*.ts' > TODO.md",
-    "generate-docs": "tree -I 'node_modules|dist' > documents.md && leasot -x --reporter markdown 'src/**/*.ts' >> document.md"
+    "docs:generate": "tree -I 'node_modules|dist' > documents.md && leasot -x --reporter markdown 'src/**/*.ts' >> document.md"
   },
   "dependencies": {
     "@discordjs/rest": "^2.0.1",

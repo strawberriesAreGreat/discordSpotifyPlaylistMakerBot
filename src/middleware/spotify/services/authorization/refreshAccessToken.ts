@@ -33,7 +33,7 @@ export function refreshAccessToken(
   return pipe(
     TE.tryCatch(
       () => axios(authOptions),
-      () => new RefreshTokenFailure()
+      (error) => new RefreshTokenFailure(error as Error)
     ),
     TE.chain((response) =>
       response.status === 200 && response.data.access_token !== null

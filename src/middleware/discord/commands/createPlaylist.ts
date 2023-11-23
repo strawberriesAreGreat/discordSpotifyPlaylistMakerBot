@@ -1,44 +1,61 @@
 import axios, { AxiosResponse } from 'axios';
 import Discord, { Message } from 'discord.js';
 import dotenv from 'dotenv';
-import { DiscordUsers } from '../../../models';
+import { DiscordUsers, SpotifyCredentials } from '../../../models';
+import { TextChannel } from 'discord.js';
+import { decryptString } from '../../../services';
 
-dotenv.config();
+// curl --request POST \
+//   --url https://api.spotify.com/v1/users/smedjan/playlists \
+//   --header 'Authorization: Bearer 1POdFZRZbvb...qqillRxMr2z' \
+//   --header 'Content-Type: application/json' \
+//   --data '{
+//     "name": "New Playlist",
+//     "description": "New playlist description",
+//     "public": false
+// }'
 
-export async function createPlaylist(user: DiscordUsers, message: Message) {
+export async function createPlaylist(
+  spotifyCredentials: SpotifyCredentials,
+  message: Message
+) {
   console.log('Creating playlist');
-  const args = message.content.split(' ');
 
-  if (args.length >= 2) {
-    const playlistName = args.slice(1).join(' ');
+  const playlistName =
+    message.guild?.name +
+    ' - ' +
+    (message.channel as TextChannel).name?.replace(/-/g, ' ');
+  const playlistDescription =
+    message.guild?.description ||
+    `Playlist created from songs posted on ${message.guild?.name} in channel ${(
+      message.channel as TextChannel
+    ).name?.replace(/-/g, ' ')}`;
 
-    //TODO: Get user ID from Spotify AaPI
-    const userId = '31li5bcqfcbaaq5lgjvrimdhonve';
+  const authOptions = {
+    url: `https://api.spotify.com/v1/users/${spotifyCredentials.userUri}/playlists`,
+    method: 'POST',
+    headers: {
+      Authorization:
+        'Bearer ' +
+        decryptString(
+          spotifyCredentials.accessToken,
+          process.env.ENCRYPTION_SECRET as string
+        ),
+      'Content-Type': 'application/json',
+    },
+    data: {
+      name: playlistName,
+      description: playlistDescription,
+      public: false,
+    },
+  };
 
-    try {
-      const response = await axios.post(
-        `https://api.spotify.com/v1/users/${userId}/playlists`,
-        {
-          name: playlistName,
-          description: 'New playlist description',
-          public: false,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.SPOTIFY_ACCESS_TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      const playlistId = response.data.id;
-      message.channel.send(
-        `New playlist "${playlistName}" has been created with ID ${playlistId}`
-      );
-    } catch (error) {
-      console.error('Error creating playlist:', error);
-      message.channel.send('Error creating playlist. Please try again later.');
-    }
-  } else {
-    message.channel.send('Please provide a name for the new playlist.');
+  try {
+    const response = await axios(authOptions);
+    console.log(response);
+    return response;
+  } catch (error) {
+    console.log(error);
+    return error;
   }
 }

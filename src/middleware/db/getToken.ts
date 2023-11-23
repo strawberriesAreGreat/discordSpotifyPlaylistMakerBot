@@ -11,7 +11,7 @@ export function getToken(
     TE.tryCatch(
       () =>
         SpotifyCredentials.findOne({
-          where: { discordUserId: discordUser.id },
+          where: { userId: discordUser.id },
         }),
       (error) => new DatabaseError(error as Error)
     ),

@@ -28,13 +28,13 @@ export function getUserProfile(
   return pipe(
     TE.tryCatch(
       () => axios(authOptions),
-      (error) => new SpotifyApiError()
+      (error) => new SpotifyApiError(error as Error)
     ),
     TE.chain((response) =>
       response.status === 200 && response.data.access_token !== null
         ? TE.right({
             ...spotifyData,
-            userUri: response.data.uri,
+            userUri: response.data.uri.split(':')[2],
           } as SpotifyTokenData)
         : TE.left(new UserProfileError())
     )

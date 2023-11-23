@@ -7,7 +7,7 @@ import { DiscordCommand } from '../../../middleware/discord/commandDictionary';
 
 export interface DiscordUserData {
   user: DiscordUsers;
-  token: AccessToken;
+  spotifyCredentials: SpotifyCredentials;
   message: Message;
   command: DiscordCommand;
   args: string[];

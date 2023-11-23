@@ -9,10 +9,11 @@ import {
 import { getUser } from '../db/getUser';
 import { getToken } from '../db/getToken';
 import { hashDiscordId } from '../../services';
+import { SpotifyCredentials } from '../../models';
 
-export function getSpotifyToken(
+export function getSpotifyCredentials(
   discordUserData: DiscordUserData
-): TE.TaskEither<Error, AccessToken> {
+): TE.TaskEither<Error, SpotifyCredentials> {
   return pipe(
     discordUserData,
     TE.right,
@@ -22,21 +23,21 @@ export function getSpotifyToken(
       pipe(
         spotifyToken,
         TE.fromNullable(new TokenNotFoundError()),
-        TE.chain((token) =>
-          token.tokenExpiryTimestamp > new Date()
-            ? TE.right(token.accessToken)
+        TE.chain((spotifyCredentials) =>
+          spotifyCredentials.tokenExpiryTimestamp > new Date()
+            ? TE.right(spotifyCredentials)
             : pipe(
-                refreshAccessToken(token.refreshToken),
-                TE.chain((spotifyTokenData) =>
+                refreshAccessToken(spotifyCredentials.refreshToken),
+                TE.chain((refreshedSpotifyTokenData) =>
                   saveTokenDataToDb(
-                    spotifyTokenData,
+                    refreshedSpotifyTokenData,
                     hashDiscordId(discordUserData.message.author.id)
                   )
                 ),
-                TE.map(() => token.accessToken)
+                TE.map((refreshedSpotifyTokenData) => refreshedSpotifyTokenData)
               )
         ),
-        TE.map((accessToken) => accessToken)
+        TE.map((spotifyCredentials) => spotifyCredentials)
       )
     )
   );

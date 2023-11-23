@@ -13,7 +13,7 @@ import {
 } from '../../utils/errors';
 import * as O from 'fp-ts/Option';
 import { DiscordUserData } from '../../utils/types/interfaces';
-import { getSpotifyToken } from '../spotify/getSpotifyToken';
+import { getSpotifyCredentials } from '../spotify/getSpotifyCredentials';
 
 // get user auth token, run command if auth token exists
 export function discordCommand(message: Message): void {
@@ -82,8 +82,11 @@ export function combineDiscordUserDataAndSpotifyToken(
     return pipe(
       discordUserData,
       TE.right,
-      TE.chain(getSpotifyToken),
-      TE.map((token) => ({ ...discordUserData, token: token }))
+      TE.chain(getSpotifyCredentials),
+      TE.map((credentials) => ({
+        ...discordUserData,
+        spotifyCredentials: credentials,
+      }))
     );
   } else {
     return TE.right(discordUserData);
@@ -94,22 +97,25 @@ export function runCommand({
   message,
   command,
   user,
-  token,
+  spotifyCredentials,
 }: DiscordUserData): TE.TaskEither<Error, void> {
   if (!command.execute) {
     return TE.left(new Error('Command not found'));
   }
+  if (command.requiresUser && !spotifyCredentials) {
+    return TE.left(new UnauthorizedDiscordCommand(message));
+  }
 
   return pipe(
-    { message, command, user },
+    { message, command, spotifyCredentials },
     TE.right,
     TE.chain(() => {
+      console.log('FROG');
       try {
         return command.requiresUser
-          ? TE.right(command.execute(user, message) as void)
+          ? TE.right(command.execute(spotifyCredentials, message) as void)
           : TE.right(command.execute(message) as void);
       } catch (err) {
-        console.log('Frog on a log in the middle of the sea...');
         return TE.left(err as Error);
       }
     })

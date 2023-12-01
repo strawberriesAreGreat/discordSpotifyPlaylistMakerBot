@@ -1,10 +1,10 @@
 import * as TE from 'fp-ts/TaskEither';
-import DiscordUsers from '../../models/DiscordUsers';
+import DiscordUsers from '../DiscordUsers/DiscordUsers';
 import { pipe } from 'fp-ts/function';
-import { DatabaseError, TokenNotFoundError } from '../../utils/errors';
-import SpotifyCredentials from '../../models/SpotifyCredentials';
+import { DatabaseError, TokenNotFoundError } from '../../../../utils/errors';
+import SpotifyCredentials from './SpotifyCredentials';
 
-export function getToken(
+export function getSpotifyCredential(
   discordUser: DiscordUsers
 ): TE.TaskEither<DatabaseError, SpotifyCredentials> {
   return pipe(

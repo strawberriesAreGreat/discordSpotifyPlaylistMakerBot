@@ -4,7 +4,7 @@ import {
   unregisteredUserCommandMap,
 } from './commandDictionary';
 import { pipe } from 'fp-ts/lib/function';
-import { getUser } from '../db/getUser';
+import { getUser } from '../db/models/DiscordUsers/getUser';
 import * as TE from 'fp-ts/TaskEither';
 import * as A from 'fp-ts/lib/Array';
 import {

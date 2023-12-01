@@ -1,14 +1,10 @@
 import * as TE from 'fp-ts/TaskEither';
-import {
-  DiscordId,
-  EncryptedString,
-  SpotifyTokenData,
-} from '../../utils/types';
+import { DiscordId, SpotifyTokenData } from '../../utils/types';
 import { decryptString, hashDiscordId } from '../../services';
-import DiscordUsers from '../../models/DiscordUsers';
+import DiscordUsers from './models/DiscordUsers/DiscordUsers';
 import { pipe } from 'fp-ts/function';
-import SpotifyCredentials from '../../models/SpotifyCredentials';
-import { TokenCreationError, UserNotFoundError } from '../../utils/errors';
+import SpotifyCredentials from './models/spotifyCredentials/SpotifyCredentials';
+import { TokenCreationError } from '../../utils/errors';
 import { DatabaseError } from '../../utils/errors';
 
 //TODO: edit function, its bad that discordUserId is optional and that this function has 2 input cases

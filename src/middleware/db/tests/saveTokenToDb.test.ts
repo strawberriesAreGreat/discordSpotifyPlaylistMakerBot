@@ -3,8 +3,8 @@ jest.mock('../../../models/SpotifyCredentials');
 jest.mock('../../../services');
 jest.mock('../db');
 
-import { DiscordUsers } from '../../../models/DiscordUsers';
-import { SpotifyCredentials } from '../../../models/SpotifyCredentials';
+import { DiscordUsers } from '../models/DiscordUsers/DiscordUsers';
+import { SpotifyCredentials } from '../models/spotifyCredentials/SpotifyCredentials';
 import { decryptString, hashDiscordId } from '../../../services';
 import {
   EncryptedString,

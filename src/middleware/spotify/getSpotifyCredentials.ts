@@ -6,10 +6,10 @@ import {
   refreshAccessToken,
   saveTokenDataToDb,
 } from './services/authorization';
-import { getUser } from '../db/getUser';
-import { getToken } from '../db/getToken';
+import { getUser } from '../db/models/DiscordUsers/getUser';
+import { getSpotifyCredential } from '../db/models/spotifyCredentials/getSpotifyCredential';
 import { hashDiscordId } from '../../services';
-import { SpotifyCredentials } from '../../models';
+import { SpotifyCredentials } from '../db/models';
 
 export function getSpotifyCredentials(
   discordUserData: DiscordUserData
@@ -18,7 +18,7 @@ export function getSpotifyCredentials(
     discordUserData,
     TE.right,
     TE.chain((discordUserData) => getUser(discordUserData.message)),
-    TE.chain((discordUser) => getToken(discordUser)),
+    TE.chain((discordUser) => getSpotifyCredential(discordUser)),
     TE.chain((spotifyToken) =>
       pipe(
         spotifyToken,

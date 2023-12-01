@@ -30,7 +30,7 @@ import {
   registeredUserCommandMap,
   unregisteredUserCommandMap,
 } from '../commandDictionary';
-import { DiscordUsers } from '../../../models';
+import { DiscordUsers } from '../../../middleware/db/models';
 import * as E from 'fp-ts/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { DiscordUserData } from '../../../utils/types/interfaces';

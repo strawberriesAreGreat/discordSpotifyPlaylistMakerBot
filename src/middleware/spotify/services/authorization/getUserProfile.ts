@@ -2,11 +2,7 @@ import * as TE from 'fp-ts/TaskEither';
 import { SpotifyTokenData } from '../../../../utils/types';
 import { pipe } from 'fp-ts/function';
 import axios from 'axios';
-import {
-  AccessTokenFailure,
-  SpotifyApiError,
-  UserProfileError,
-} from '../../../../utils/errors';
+import { SpotifyApiError, UserProfileError } from '../../../../utils/errors';
 import { decryptString, encryptString } from '../../../../services';
 
 export function getUserProfile(

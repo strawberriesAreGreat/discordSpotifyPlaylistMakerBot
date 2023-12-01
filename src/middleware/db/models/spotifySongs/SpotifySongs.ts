@@ -1,5 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../middleware/db/db';
+import { sequelize } from '../../db';
 
 export class SpotifySongs extends Model {
   public id!: number;

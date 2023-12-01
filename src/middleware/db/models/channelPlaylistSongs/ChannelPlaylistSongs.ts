@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../middleware/db/db';
-import { SpotifySongs } from './SpotifySongs';
-import { DiscordChannelPlaylists } from './DiscordChannelPlaylists';
+import { sequelize } from '../../db';
+import { SpotifySongs } from '../spotifySongs/SpotifySongs';
+import { DiscordChannelPlaylists } from '../discordChannelPlaylists/DiscordChannelPlaylists';
 
 export class ChannelPlaylistSongs extends Model {
   public id!: number;

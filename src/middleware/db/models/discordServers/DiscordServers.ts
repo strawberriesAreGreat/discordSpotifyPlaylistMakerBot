@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../middleware/db/db';
-import { HashedString } from '../utils/types';
+import { sequelize } from '../../db';
+import { HashedString } from '../../../../utils/types';
 
 export class DiscordServers extends Model {
   public id!: number;

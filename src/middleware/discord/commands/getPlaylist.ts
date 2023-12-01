@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import Discord, { Message } from 'discord.js';
 import dotenv from 'dotenv';
-import { DiscordUsers } from '../../../models';
+import { DiscordUsers } from '../../db/models';
 
 dotenv.config();
 

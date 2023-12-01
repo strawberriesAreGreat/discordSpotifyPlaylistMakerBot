@@ -5,8 +5,6 @@ spotify playlist creation and handling
 
 # Structure
 
-Whats spotify API's rate limit?
-
 # TODO
 
 ## TESTS
@@ -24,7 +22,7 @@ Whats spotify API's rate limit?
 
 ## Song is added to channel
 
-1. [ ] if user doesn't exist, create new user in DB
+1. [ ] if song doesn't exist, create new song in DB
 2. [ ] add song element
 
 ## Commands
@@ -46,3 +44,8 @@ Whats spotify API's rate limit?
        DISCORD ?? 2.4. [ ] if fault == SPOTIFY >> add traslation layer based on
        their responses
        [Documentation](https://developer.spotify.com/documentation/web-api/concepts/api-calls)
+3. [ ] respond with emoji
+
+## DB
+
+1. [ ] move to src folder and out of middleware

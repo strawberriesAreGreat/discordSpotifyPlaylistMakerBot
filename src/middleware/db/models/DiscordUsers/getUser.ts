@@ -1,9 +1,9 @@
 import * as TE from 'fp-ts/TaskEither';
-import { hashDiscordId } from '../../services';
-import DiscordUsers from '../../models/DiscordUsers';
+import { hashDiscordId } from '../../../../services';
+import DiscordUsers from './DiscordUsers';
 import { pipe } from 'fp-ts/function';
 import { Message } from 'discord.js';
-import { DatabaseError, UserNotFoundError } from '../../utils/errors';
+import { DatabaseError, UserNotFoundError } from '../../../../utils/errors';
 
 export function getUser(
   message: Message

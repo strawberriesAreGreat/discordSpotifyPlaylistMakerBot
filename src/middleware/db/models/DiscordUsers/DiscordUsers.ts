@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../middleware/db/db';
-import { DiscordId } from '../utils/types';
+import { sequelize } from '../../db';
+import { DiscordId } from '../../../../utils/types';
 
 export class DiscordUsers extends Model {
   public id!: number;

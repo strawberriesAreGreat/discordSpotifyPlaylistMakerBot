@@ -1,7 +1,10 @@
 // utils/types/DiscordUserData.ts
 
 import { Message } from 'discord.js';
-import { DiscordUsers, SpotifyCredentials } from '../../../models';
+import {
+  DiscordUsers,
+  SpotifyCredentials,
+} from '../../../middleware/db/models';
 import { DiscordUsername, DiscordId, AccessToken } from '../enums';
 import { DiscordCommand } from '../../../middleware/discord/commandDictionary';
 

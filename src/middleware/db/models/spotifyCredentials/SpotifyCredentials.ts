@@ -1,6 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../middleware/db/db';
-import DiscordUsers from './DiscordUsers';
+import { sequelize } from '../../db';
+import DiscordUsers from '../DiscordUsers/DiscordUsers';
 import {
   AccessToken,
   HashedString,
@@ -8,7 +8,7 @@ import {
   RefreshTokenExpiry,
   Scope,
   UserUri,
-} from '../utils/types';
+} from '../../../../utils/types';
 
 export class SpotifyCredentials extends Model {
   public id!: number;

@@ -1,8 +1,8 @@
 import { DataTypes, Model } from 'sequelize';
-import { sequelize } from '../middleware/db/db';
-import DiscordUsers from './DiscordUsers';
-import { DiscordChannels } from './DiscordChannels';
-import { EncryptedString, HashedString } from '../utils/types';
+import { sequelize } from '../../db';
+import DiscordUsers from '../DiscordUsers/DiscordUsers';
+import { DiscordChannels } from '../discordChannels/DiscordChannels';
+import { EncryptedString, HashedString } from '../../../../utils/types';
 
 export class DiscordChannelPlaylists extends Model {
   public id!: number;

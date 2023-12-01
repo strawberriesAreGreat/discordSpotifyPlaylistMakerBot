@@ -5,7 +5,6 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { RefreshTokenFailure } from '../../../../utils/errors';
 import { decryptString, encryptString } from '../../../../services';
 import qs from 'qs';
-import * as O from 'fp-ts/Option';
 
 export function refreshAccessToken(
   refreshToken: RefreshToken

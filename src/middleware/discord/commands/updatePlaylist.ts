@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 import Discord, { Message, TextBasedChannel } from 'discord.js';
 import dotenv from 'dotenv';
 import { getURIS, addSongs } from '../../spotify/services';
-import { DiscordUsers } from '../../../models';
+import { DiscordUsers } from '../../db/models';
 // import { SpotifyCredentials } from '../../spotify/services';
 
 dotenv.config();

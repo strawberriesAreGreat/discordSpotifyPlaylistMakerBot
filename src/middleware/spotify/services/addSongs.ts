@@ -1,7 +1,10 @@
 import axios, { AxiosResponse } from 'axios';
 import Discord, { Message } from 'discord.js';
 import dotenv from 'dotenv';
-import { DiscordUsers, SpotifyCredentials } from '../../../models';
+import {
+  DiscordUsers,
+  SpotifyCredentials,
+} from '../../../middleware/db/models';
 import { TextChannel } from 'discord.js';
 import { decryptString } from '../../../services';
 import { SpotifyApiError } from '../../../utils/errors';

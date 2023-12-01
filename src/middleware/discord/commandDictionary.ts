@@ -53,7 +53,7 @@ export const unregisteredUserCommandMap = new Map<RegExp, DiscordCommand>([
   [
     /^!authorize$/i,
     {
-      execute: (message) => commands.sendAuthorizationLink(message),
+      execute: (message) => commands.authorize(message),
       requiresUser: false,
     },
   ],

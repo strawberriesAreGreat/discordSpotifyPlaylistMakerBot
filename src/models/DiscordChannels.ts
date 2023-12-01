@@ -1,31 +1,25 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
-import { DiscordServer } from './DiscordServer';
+import { DiscordServers } from './DiscordServers';
 import { HashedString } from '../utils/types';
-export class DiscordChannel extends Model {
+export class DiscordChannels extends Model {
   public id!: number;
-  public channelId!: HashedString;
+  public channelHash!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
-
-  findOrCreateByServerId(serverId: HashedString) {
-    return DiscordChannel.findOrCreate({
-      where: {
-        serverId,
-      },
-    });
-  }
 }
 
-DiscordChannel.init(
+DiscordChannels.init(
   {
     id: {
+      primaryKey: true, // TODO: unable to drop this from partial primary key... is it a bug? see if it's related to https://github.com/sequelize/sequelize/pull/14687
       type: DataTypes.INTEGER,
       autoIncrement: true,
       allowNull: false,
-      primaryKey: true,
+      unique: true,
     },
     serverId: {
+      primaryKey: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -33,10 +27,10 @@ DiscordChannel.init(
         key: 'id',
       },
     },
-    channelId: {
+    channelHash: {
+      primaryKey: true,
       type: DataTypes.STRING(128),
       allowNull: false,
-      primaryKey: true,
       unique: true,
       validate: {
         is: /^[a-f0-9]+$/i,
@@ -51,10 +45,13 @@ DiscordChannel.init(
   },
   {
     sequelize,
-    modelName: 'DiscordServer',
+    modelName: 'DiscordChannels',
   }
 );
 
-DiscordServer.hasMany(DiscordChannel, {
+DiscordServers.hasMany(DiscordChannels, {
   foreignKey: 'serverId',
+  sourceKey: 'id',
 });
+
+export default DiscordChannels;

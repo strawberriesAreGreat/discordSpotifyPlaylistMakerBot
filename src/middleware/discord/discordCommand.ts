@@ -110,14 +110,26 @@ export function runCommand({
     { message, command, spotifyCredentials },
     TE.right,
     TE.chain(() => {
-      console.log('FROG');
       try {
         return command.requiresUser
           ? TE.right(command.execute(spotifyCredentials, message) as void)
           : TE.right(command.execute(message) as void);
       } catch (err) {
-        return TE.left(err as Error);
+        return err instanceof Error
+          ? TE.left(err)
+          : TE.left(new Error('Command failed'));
       }
-    })
+    }),
+    TE.fold(
+      (err) => {
+        console.warn(err);
+        if (err) {
+          // react with stop sign emoji on message and dm user
+          console.log('RESPONSE', err);
+        }
+        return TE.of(undefined);
+      },
+      () => TE.of(undefined)
+    )
   );
 }

@@ -1,43 +1,37 @@
 import axios, { AxiosResponse } from 'axios';
 import Discord, { Message } from 'discord.js';
 import dotenv from 'dotenv';
+import { DiscordUsers, SpotifyCredentials } from '../../../models';
+import { TextChannel } from 'discord.js';
+import { decryptString } from '../../../services';
+import { SpotifyApiError } from '../../../utils/errors';
 
-dotenv.config();
+// curl --request POST \
+//   --url https://api.spotify.com/v1/users/smedjan/playlists \
+//   --header 'Authorization: Bearer 1POdFZRZbvb...qqillRxMr2z' \
+//   --header 'Content-Type: application/json' \
+//   --data '{
+//     "name": "New Playlist",
+//     "description": "New playlist description",
+//     "public": false
+// }'
 
 export async function addSongs(
-  message: Message,
-  songs: string[]
-): Promise<void> {
-  const guildId = message.guild?.id;
-  const guildName = message.guild?.name;
-
-  if (guildId) {
-    await axios
-      .post(`${process.env.API_URL}playlists/${guildId}/songs`, {
-        spotify_tracks: songs,
-      })
-      .then((res: AxiosResponse) => {
-        console.log(res.status);
-        message.react('🐧');
-      })
-      .catch((error: Error) => {
-        if (error.toString().includes('404')) {
-          console.log('INFO: No playlist exists. Creating playlist.');
-          axios
-            .post(`${process.env.API_URL}playlists/`, {
-              group_id: guildId,
-              group_name: guildName,
-            })
-            .then((res: AxiosResponse) => {
-              console.log(res);
-              addSongs(message, songs);
-            })
-            .catch((error: Error) => {
-              console.log('ERROR: COULDNT Add music' + error);
-            });
-        }
-      });
-  } else {
-    console.error('Error: Guild ID not found');
-  }
+  spotifyCredentials: SpotifyCredentials,
+  message: Message
+) {
+  // console.log('Adding songs to playlist');
+  // // check database for server and channel playlist
+  // // if it exists - check channel for any new songs, then add saved songs from database and new songs to the spotify playlist
+  // // scrape channel for all songs
+  // try {
+  //   const response = await axios(authOptions);
+  //   console.log(response);
+  //   message.react('🐧');
+  //   return response;
+  // } catch (error) {
+  //   new SpotifyApiError(error as Error);
+  //   message.react('😢');
+  //   return error;
+  // }
 }

@@ -11,6 +11,9 @@ import SpotifyCredentials from '../../models/SpotifyCredentials';
 import { TokenCreationError, UserNotFoundError } from '../../utils/errors';
 import { DatabaseError } from '../../utils/errors';
 
+//TODO: edit function, its bad that discordUserId is optional and that this function has 2 input cases
+// 1. user is provded
+// 2. user is created
 export function saveTokenDataToDb(
   spotifyData: SpotifyTokenData,
   discordUserId?: DiscordId
@@ -23,6 +26,32 @@ export function saveTokenDataToDb(
   const tokenExpiryTimestamp = spotifyData.tokenExpiryTime;
   const tokenType = spotifyData.tokenType;
   const userUri = spotifyData.userUri;
+
+  const updateCredentials = (user: DiscordUsers) =>
+    SpotifyCredentials.update(
+      {
+        accessToken: accessToken,
+        ...(refreshToken ? { refreshToken: refreshToken } : {}),
+        scope: scope,
+        tokenExpiry: tokenExpiry,
+        tokenExpiryTimestamp: tokenExpiryTimestamp,
+        tokenType: tokenType,
+        ...(userUri ? { userUri: userUri } : {}),
+      },
+      { where: { userId: user.id } }
+    );
+
+  const createCredentials = (user: DiscordUsers) =>
+    SpotifyCredentials.create({
+      userId: user.id,
+      accessToken: accessToken,
+      ...(refreshToken ? { refreshToken: refreshToken } : {}),
+      scope: scope,
+      tokenExpiry: tokenExpiry,
+      tokenExpiryTimestamp: tokenExpiryTimestamp,
+      tokenType: tokenType,
+      ...(userUri ? { userUri: userUri } : {}),
+    });
 
   if (!discordUserId && spotifyData.state)
     discordUserId = hashDiscordId(
@@ -37,29 +66,75 @@ export function saveTokenDataToDb(
 
   return pipe(
     TE.tryCatch(
-      () =>
-        DiscordUsers.upsert({
-          discordId: discordUserId,
-        }),
-      (err) => new DatabaseError(err as Error)
+      () => DiscordUsers.findOne({ where: { userHash: discordUserId } }),
+      (err) => {
+        console.log(err);
+        return new DatabaseError(err as Error);
+      }
     ),
-    TE.chain(([user, _]) => TE.right(user)),
+    TE.chain((user) =>
+      user
+        ? TE.right(user)
+        : TE.tryCatch(
+            async () => {
+              const [user, created] = await DiscordUsers.upsert({
+                userHash: discordUserId,
+              });
+              return user;
+            },
+            (err) => {
+              console.log(err);
+              return new DatabaseError(err as Error);
+            }
+          )
+    ),
     TE.chain((user) =>
       TE.tryCatch(
         () =>
-          SpotifyCredentials.upsert({
-            userId: user.id, // Use the ID from the DiscordUser
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            scope: scope,
-            tokenExpiry: tokenExpiry,
-            tokenExpiryTimestamp: tokenExpiryTimestamp,
-            tokenType: tokenType,
-            userUri: userUri,
-          }),
+          SpotifyCredentials.update(
+            {
+              accessToken: accessToken,
+              ...(refreshToken ? { refreshToken: refreshToken } : {}),
+              scope: scope,
+              tokenExpiry: tokenExpiry,
+              tokenExpiryTimestamp: tokenExpiryTimestamp,
+              tokenType: tokenType,
+              ...(userUri ? { userUri: userUri } : {}),
+            },
+            { where: { userId: user.id } }
+          )
+            .then(([affectedCount]) => {
+              if (affectedCount === 0) {
+                return SpotifyCredentials.create({
+                  userId: user.id,
+                  accessToken: accessToken,
+                  ...(refreshToken ? { refreshToken: refreshToken } : {}),
+                  scope: scope,
+                  tokenExpiry: tokenExpiry,
+                  tokenExpiryTimestamp: tokenExpiryTimestamp,
+                  tokenType: tokenType,
+                  ...(userUri ? { userUri: userUri } : {}),
+                });
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+              new TokenCreationError(err as Error) as Error;
+            }),
         (err) => new TokenCreationError(err as Error) as Error
       )
     ),
-    TE.chain(([spotifyToken, _]) => TE.right(spotifyToken))
+    TE.fold(
+      (err) => TE.left(err),
+      (spotifyCredential) => {
+        if (!spotifyCredential)
+          return TE.left(
+            new DatabaseError(
+              new Error('No Spotify Credentials inserted into DB')
+            )
+          );
+        return TE.right(spotifyCredential);
+      }
+    )
   );
 }

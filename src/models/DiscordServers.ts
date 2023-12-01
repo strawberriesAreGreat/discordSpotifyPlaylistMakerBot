@@ -2,35 +2,26 @@ import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
 import { HashedString } from '../utils/types';
 
-export class DiscordServer extends Model {
+export class DiscordServers extends Model {
   public id!: number;
-  public serverId!: HashedString;
+  public serverHash!: HashedString;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
-
-  public static async findOrCreateByServerId(serverId: HashedString) {
-    const [server, created] = await DiscordServer.findOrCreate({
-      where: {
-        serverId,
-      },
-    });
-
-    return server;
-  }
 }
 
-DiscordServer.init(
+DiscordServers.init(
   {
     id: {
+      primaryKey: true, // TODO: unable to drop this from partial primary key... is it a bug? see if it's related to https://github.com/sequelize/sequelize/pull/14687
       type: DataTypes.INTEGER,
       autoIncrement: true,
       allowNull: false,
-      primaryKey: true,
+      unique: true,
     },
-    serverId: {
+    serverHash: {
+      primaryKey: true,
       type: DataTypes.STRING(128),
       allowNull: false,
-      primaryKey: true,
       unique: true,
       validate: {
         is: /^[a-f0-9]+$/i,
@@ -45,6 +36,8 @@ DiscordServer.init(
   },
   {
     sequelize,
-    modelName: 'DiscordServer',
+    modelName: 'DiscordServers',
   }
 );
+
+export default DiscordServers;

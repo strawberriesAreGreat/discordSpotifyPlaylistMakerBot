@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../middleware/db/db';
 import { SpotifySongs } from './SpotifySongs';
-import { DiscordChannelPlaylists } from './ChannelPlaylists';
+import { DiscordChannelPlaylists } from './DiscordChannelPlaylists';
 
 export class ChannelPlaylistSongs extends Model {
   public id!: number;
@@ -29,13 +29,14 @@ export class ChannelPlaylistSongs extends Model {
 ChannelPlaylistSongs.init(
   {
     id: {
+      primaryKey: true, // TODO: unable to drop this from partial primary key... is it a bug? see if it's related to https://github.com/sequelize/sequelize/pull/14687
       type: DataTypes.INTEGER,
       autoIncrement: true,
       allowNull: false,
-      primaryKey: true,
       unique: true,
     },
     channelPlaylistId: {
+      primaryKey: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -44,6 +45,7 @@ ChannelPlaylistSongs.init(
       },
     },
     songId: {
+      primaryKey: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -66,7 +68,9 @@ ChannelPlaylistSongs.init(
 
 SpotifySongs.hasMany(ChannelPlaylistSongs, {
   foreignKey: 'songId',
+  sourceKey: 'id',
 });
 DiscordChannelPlaylists.hasMany(ChannelPlaylistSongs, {
   foreignKey: 'channelPlaylistId',
+  sourceKey: 'id',
 });

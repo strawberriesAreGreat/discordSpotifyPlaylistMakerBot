@@ -4,36 +4,23 @@ import { DiscordId } from '../utils/types';
 
 export class DiscordUsers extends Model {
   public id!: number;
-  public discordId!: DiscordId;
+  public userHash!: DiscordId;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
-
-  public static async findOrCreateByDiscordId(
-    discordId: DiscordId
-  ): Promise<DiscordUsers> {
-    const [user, created] = await DiscordUsers.findOrCreate({
-      where: {
-        discordId,
-      },
-    });
-
-    return user;
-  }
 }
 
 DiscordUsers.init(
   {
     id: {
+      primaryKey: true, // TODO: unable to drop this from partial primary key... is it a bug? see if it's related to https://github.com/sequelize/sequelize/pull/14687
       type: DataTypes.INTEGER,
       autoIncrement: true,
       allowNull: false,
-      primaryKey: true,
       unique: true,
     },
-    discordId: {
+    userHash: {
       type: DataTypes.STRING(128),
       allowNull: false,
-      primaryKey: true,
       unique: true,
       validate: {
         is: /^[a-f0-9]+$/i,

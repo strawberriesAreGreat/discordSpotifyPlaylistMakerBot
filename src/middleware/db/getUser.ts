@@ -12,7 +12,7 @@ export function getUser(
     TE.tryCatch(
       () =>
         DiscordUsers.findOne({
-          where: { discordId: hashDiscordId(message.author.id) },
+          where: { userHash: hashDiscordId(message.author.id) },
         }),
       (err: unknown) => new DatabaseError(err as Error)
     ),

@@ -116,7 +116,7 @@ describe('saveTokenDataToDb()', () => {
     expect(decryptString).not.toHaveBeenCalled();
 
     expect(DiscordUsers.upsert).toHaveBeenCalledWith({
-      discordId: hashedDiscordId,
+      userHash: hashedDiscordId,
     });
 
     expect(SpotifyCredentials.upsert).toHaveBeenCalledWith({

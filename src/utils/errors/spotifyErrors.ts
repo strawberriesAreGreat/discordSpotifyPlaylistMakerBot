@@ -64,3 +64,15 @@ export class RefreshTokenFailure extends SpotifyApiError {
     this.fault = FaultType.INTERNAL;
   }
 }
+
+export class PlaylistCreationFailure extends SpotifyApiError {
+  responseCode: number;
+  constructor(responseCode: number, message: Message) {
+    super();
+    this.name = 'SpotifyPlaylistCreationFailure';
+    this.service = 'spotify';
+    this.fault = FaultType.INTERNAL;
+    this.responseCode = responseCode;
+    message = message;
+  }
+}

@@ -3,10 +3,25 @@ import { sequelize } from '../../db';
 
 export class SpotifySongs extends Model {
   public id!: number;
-  public songURI!: string;
+  public songURIs!: string;
   public count!: number;
-  public tempo!: number;
+  public albumURI!: string;
+  public artistURI!: string;
+  public availableMarkets!: string;
+  public discNumber!: number;
+  public durationMS!: number;
+  public explicit!: boolean;
+  public externalIds!: string; // isc, ean, upc
+  public externalUrls!: string; // spotify
+  public href!: string;
+  public isLocal!: boolean;
+  public isPlayable!: boolean;
+  public linkedFrom!: string; // spotify
+  public restrictions!: string; // reason, market
+  public name!: string;
   public popularity!: number;
+  public previewUrl!: string;
+  public trackNumber!: number;
   public danceability!: number;
   public duration_ms!: number;
   public energy!: number;
@@ -21,34 +36,6 @@ export class SpotifySongs extends Model {
   public time_signature!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
-
-  public static async findOrCreateBySongURI(songURI: string) {
-    const [song, created] = await SpotifySongs.findOrCreate({
-      where: {
-        uri: songURI,
-      },
-    });
-
-    return song;
-  }
-
-  public static async getSong(songURI: string): Promise<SpotifySongs | null> {
-    return await SpotifySongs.findOne({
-      where: {
-        uri: songURI,
-      },
-    });
-  }
-
-  public static async getSongById(
-    songId: number
-  ): Promise<SpotifySongs | null> {
-    return await SpotifySongs.findOne({
-      where: {
-        id: songId,
-      },
-    });
-  }
 }
 SpotifySongs.init(
   {

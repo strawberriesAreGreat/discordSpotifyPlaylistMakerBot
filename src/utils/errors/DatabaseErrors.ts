@@ -41,3 +41,12 @@ export class TokenCreationError extends DatabaseError {
     this.fault = FaultType.INTERNAL;
   }
 }
+
+export class SongNotFound extends DatabaseError {
+  constructor(error?: Error) {
+    super(error ? error : error);
+    this.name = 'SongNotFound';
+    this.service = 'db';
+    this.fault = FaultType.INTERNAL;
+  }
+}
